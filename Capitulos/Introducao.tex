@@ -1,0 +1,137 @@
+% Introdução
+\chapter{Introdução}
+
+Este trabalho apresenta um novo problema de planejamento que tem como inspiração o ambiente dos jogos de estratégia em tempo real. Neste capítulo, iremos introduzir os conceitos de jogos de estratégia em tempo real, as peculiaridades de um jogo deste gênero, \emph{StarCraft}, e mostrar como sua dificuldade e dinamismo inspirou pesquisadores a criar novos métodos de Inteligência Artificial voltados a este ambiente. O pesquisador do Google Jeffrey Dean indicou a possibilidade do Google DeepMind voltar seus esforços a este jogo \cite{weinberger16}, após a derrota do campeão mundial de Go Lee Sedol para a inteligência artificial AlphaGo.
+
+\section{Jogos de Estratégia em Tempo Real}
+Jogos de estratégia em tempo real, ou \abrv[RTS -- Real-Time Strategy Game]{RTS}(\emph{Real-Time Strategy}), tiveram seu início com o lançamento de \emph{Dune II}\footnote{Publicado pela Virgin Interactive, desenvolvido pela Westwood Studios.} em 1992. Desde então, vários títulos do mesmo gênero foram lançados, como as séries \emph{WarCraft}, \emph{Age of Empires} e \emph{Command \& Conquer}. Deste gênero, a série de maior sucesso tanto como produto quanto como esporte eletrônico é a \emph{StarCraft}\footnote{Publicado e desenvolvido pela Blizzard Entertainment.}.
+
+Os jogos de estratégia em tempo real possuem um conjunto de características que os diferenciam de outros jogos:
+
+%O gênero de jogos de estratégia em tempo real, ou \abrv[RTS -- Real-Time Strategy Game]{RTS} (\emph{real-time strategy}), como o conhecemos hoje, começou em 1992 com o lançamento do jogo Dune II\footnote{Publicado pela Virgin Interactive, desenvolvido pela Westwood Studios.}. O jogo feito para DOS, Amiga e Mega Drive foi o primeiro que permitia ao jogador criar unidades e estruturas e enfrentar um inimigo nas mesmas condições. Nele é possível identificar os elementos que estarão presentes em todos os jogos de estratégia a partir de então:
+
+\begin{itemize}
+  \item Coleta de recursos;
+  \item Construção de estruturas;
+  \item Produção de unidades;
+  \item Diferentes facções;
+  \item Mapa conceitual do campo de batalha (ver Figura~\ref{fig:duneII});
+  \item Controle feito pelo cursor do \emph{mouse}.
+\end{itemize}
+
+\begin{figure}
+  \centering
+  \includegraphics[scale=0.35]{Imagens/DuneII.jpg}
+  \caption{Captura de tela de Dune II.}
+  \label{fig:duneII}
+\end{figure}
+
+Partidas deste gênero começam com um estado inicial similar: o jogador possui no início do jogo uma pequena quantidade de recursos, uma estrutura que serve de base e trabalhadores para coletar recursos. Alguns jogos dão ao jogador unidades militares no início do jogo também, como os jogos da série \emph{Age of Empires}. Com estes coletores de recursos, o jogador poderá investir seus recursos em aprimorar sua economia, ao criar novos trabalhadores e novas bases, e criar um exército forte o bastante para derrotar o seu adversário.
+
+Como este gênero de jogos se joga em tempo real, as decisões que o jogador deve tomar devem ser ponderadas enquanto se controla todo o grupo de unidades criado por ele. Esse controle envolve: (a) patrulhar o terreno de jogo em busca de novos recursos e unidades inimigas, para aquisição de informações sobre suas posições e as decisões tecnológicas tomadas pelos oponentes; (b) expandir sua economia para lugares determinados como seguros, criando novas estruturas de produção de unidades ou de coleta de recursos; (c) confrontar as unidades inimigas de maneira vantajosa, controlando cada unidade do confronto eficientemente; (d) criar unidades militares eficientes contra o exército inimigo.
+
+\section{\emph{StarCraft}}
+\emph{StarCraft} é um RTS em que o jogador deve coletar dois tipos de recursos, \emph{minérios} e \emph{gás vespeno}, para poder enfrentar um grupo de inimigos. Esses recursos são normalmente distribuídos pelo mapa de forma tal que se possa criar uma base de extração, também chamada de expansão, próxima a todas as fontes de recursos\footnote{Estruturas neutras que são o alvo da coleta de recursos.}, jazidas de minérios e gêiseres de gás vespeno (Figura~\ref{fig:resources}). O conjunto de jazidas de minérios próximo a uma base é chamado de linha de minério.
+
+\begin{figure}[H]
+  \centering
+  \subfloat[Jazidas de minérios]{\includegraphics[scale=0.66]{Imagens/minerals.jpg}}
+  \qquad
+  \subfloat[Gêiser de gás vespeno]{\includegraphics[scale=0.012]{Imagens/Vespene.jpg}}
+  \caption{Recursos de \emph{StarCraft}.}
+  \label{fig:resources}
+\end{figure}
+
+Este jogo possui três facções, chamadas de raças, que o jogador pode escolher antes das partidas: Protoss, Terran e Zerg. Todas as raças possuem mecânicas únicas, porém a raça Zerg possui características que se diferem de forma mais nítida das outras. Ao invés de produzir unidades por construções especializadas que trabalham com uma fila de produção, os Zerg possuem uma estrutura que produz continuamente uma unidade chamada \emph{larva}. Larvas podem se transformar em qualquer unidade que o jogador possa construir. Além disso, estruturas podem ``evoluir'', isto é, elas podem se transformar em outras estruturas, habilitando novas possibilidades tecnológicas. Uma descrição completa do jogo se encontra no Apêndice A.
+
+\section{RTS em Inteligência Artificial}
+A partir do trabalho de \citeonline{buro03}, cujo foco é estimular pesquisas de inteligência artificial voltada a jogos RTS, muitos trabalhos foram feitos usando \emph{StarCraft} como objeto de estudo, \cite{naves12b}, \cite{sajjad11}, \cite{hagelback12}. Pelo que foi mostrado por \citeonline{ontanon13}, jogos deste gênero são ambientes complexos, onde as técnicas de IA ainda têm dificuldades, pois possuem um espaço de estados muito grande.
+
+Jogos clássicos, como Xadrez e Go, possuem uma grande complexidade com regras inteligentes e objetivos simples. Por este motivo, eles foram alvo de diversos trabalhos, como mostra o trabalho de \citeonline{bouzy2001computer}. Conforme \citeauthor{ontanon13} explicam, jogos de estratégia em tempo real possuem uma complexidade muito superior às complexidades destes dois jogos, que continuam a ser explorados por diversas técnicas de inteligência artificial.
+
+\begin{citacao}
+Outra maneira de medir a complexidade do jogo é olhando o fator de ramificação, $b$, e a profundidade do jogo, $d$, [...] , com uma complexidade total de $b^d$. Em Xadrez, $b \approx 35$ e $d \approx 80$. Em jogos mais complexos, como Go, $b \approx 30$ a $300$, e $d \approx 150$ a $200$. A fim de determinar o fator de ramificação em \emph{StarCraft} quando uma IA o joga, nós devemos ter em mente que a IA pode dar ações simultaneamente a quantas unidades no jogo for desejado. Então, considerando que, em um jogo típico, um jogador controla entre $50$ e $200$ unidades, o fator de ramificação ficaria entre $u^{50}$ e $u^{200}$, onde $u$ é o número médio de ações que cada unidade pode executar. Estimar o valor de $u$ não é fácil, pois o número de ações que uma unidade pode tomar é altamente dependente do contexto. [...] Agora, se tivermos em mente que ações possuem tempos de \emph{cool-down}\footnote{Tempo de \emph{cool-down} é o tempo em que uma habilidade ou ataque fica indisponível entre um uso e outro. Esse conceito não se restringe aos RTS e pode ser observado em jogos como \emph{World of WarCraft}.}, e assim nem todas as unidades podem executar todas as ações a todo quadro, podemos tomar uma estimativa conservadora de cerca de $10$ possíveis ações por unidade por quadro do jogo. Isto resulta em uma estimativa conservadora para o fator de ramificação entre $b \in [10^{50}, 10^{200}]$, somente considerando unidades (ignorando as ações que construções podem executar). Agora, para computar $d$, nós simplesmente consideramos o fato de que os jogos típicos duram em torno de 25 minutos, o que resulta em $d \approx 36000$ (25 minutos $\times$ 60 segundos $\times$ 24 quadros por segundo) \cite[p. 294]{ontanon13}.
+\end{citacao}
+
+Esta comparação de complexidade mostra uma diferença grande entre a quantidade de estados dos jogos. Devido a esse fator, pesquisadores como \citeauthor{buro03} e \citeauthor{ontanon13} acreditam que o investimento de pesquisas com foco em jogos de estratégia em tempo real possibilita um amplo melhoramento ou criação de técnicas de inteligência artificial.
+
+%\subsection{Desafios em RTS}
+Após 10 anos de publicação do trabalho de \citeauthoronline{buro03} e vários artigos sobre \emph{StarCraft} e seu gênero, \citeonline{ontanon13} expuseram os seis atuais desafios na criação de inteligências artificiais para jogos RTS: (a) planejamento, (b) aprendizado, (c) incerteza, (d) raciocínio temporal e espacial, (e) exploração do conhecimento de domínio, (f) decomposição de tarefas. Destes desafios, este trabalho foca no planejamento a longo prazo. Ao contrário do planejamento a curto prazo que está voltado ao microgerenciamento das unidades, o planejamento a longo prazo buscar encontrar uma série de ações que consiga cumprir algumas restrições dadas pelo jogador artificial, normalmente voltadas a desenvolver uma economia forte.
+
+\section{Planejamento de Produção em \emph{StarCraft}}
+\emph{StarCraft} possui uma natureza determinística, no sentido de que toda ação demora o tempo exato que foi programado, além de não haver chance de erro nos movimentos das unidades, construção de estruturas ou produção de unidades. Por manter essa dinâmica previsível, é possível imaginar a produção de unidades e estruturas como um problema de planejamento. Para isso, é necessário gravar o estado atual dos recursos. Esta ``fotografia'' do sistema permite simular o ambiente do jogo a partir de um determinado ponto, chamado de estado inicial do planejador.
+
+Para encontrar a melhor ordem de tarefas ou ordem de construção, a otimização foi escolhida pela simplicidade das ações no jogo. Porém, os problemas clássicos de otimização de planejamento não se encaixam na natureza de produção dinâmica de recursos de um RTS. Isto não impediu que modelos fossem criados para otimizar ordens de construção. Estes modelos se aproximaram da área de planejamento de inteligências artificiais, seja usando uma linguagem específica da área, PDDL ou \emph{Planning Domain Definition Language}, para descrever o problema de otimização de ordens de construção \cite{kovarsky06}, seja usando planejadores em conjunto com algoritmos de busca local \cite{naves12}. Duas abordagens utilizando algoritmos genéticos foram implementadas apenas para a segunda versão do jogo, \emph{StarCraft} 2 \cite{kuchem13} \cite{kostler13}. A abordagem mais utilizada para representação do problema de produção é o modelo de planejamento \emph{online} para produção de recursos em RTS \cite{chan07a}. Esta abordagem ainda se faz dependente de planejadores e não possui uma formulação matemática próxima dos problemas de planejamento clássicos.
+
+O modelo de otimização proposto neste trabalho procura aproximar-se do problema clássico de planejamento de projeto, adotando uma abordagem de otimização combinatória em comparação aos outros métodos mais próximos dos métodos de planejamento para inteligência artificial. Ao invés de se especializar nas informações particulares do jogo, um modelo generalista é proposto, onde aspectos do jogo, como limite máximo de capacidade de suprimentos, podem ser aplicados. Estas restrições não foram estabelecidas em nenhum outro modelo de otimização até então. Além disso, recursos podem estar tanto nas restrições como nas função objetivo. Dos métodos multiobjetivo para otimização de ordens de construção, apenas um deles utiliza recursos como função objetivo \cite{kuchem13} e, entre esses métodos, todos usaram algoritmos genéticos para otimização. O trabalho de \citeonline{kostler13} e o trabalho de \citeonline{captain14} utilizaram o algoritmo NSGA-II como otimizador em conjunto com outros algoritmos como planejadores. O trabalho de \citeonline{kuchem13}, entretanto, faz uma análise multiobjetiva utilizando um otimizador mono-objetivo variando restrições ao longo de um intervalo de valores.
+
+\section{Problemas de Otimização}
+Este trabalho propõe um novo problema de otimização. Problemas de otimização podem ser divididos entre os problemas mono-objetivo e os problemas multiobjetivo. O problema proposto é um problema de otimização multiobjetivo. Para explicar problemas multiobjetivo, é preciso familiaridade com os problemas de otimização mono-objetivo. Estes problemas de otimização possuem uma função objetivo que deve ser minimizada, $f(x)$. Isto é, o otimizador deve procurar um $x$ tal que $f(x)$ seja o menor possível. Estes problemas possuem a seguinte forma \cite{boyd09}:
+\begin{align}
+  &\text{minimizar } f(x)\\
+  &\text{sujeito a } g_i(x) \leq b_i, i = 1, \dots, m
+\end{align}
+
+Onde $x=(x_1,\dots,x_n)$ é a \emph{variável de decisão} do problema, a função $f : R^n \to R$ é a \emph{função objetivo}, as funções $g_i : R^n \to R, i = 1,\dots,m$ são as \emph{funções de restrição} e as constantes $b_1, \dots, b_m$ são os limites. Um vetor $x*$ é chamado de \emph{ótimo} quando ele possui o menor valor objetivo entre todos os vetores que satisfazem as restrições, isto é, para qualquer $z$ tal que $g_1(z) \leq b_1, \dots, g_m(z) \leq b_m$, nós temos $f(z) \geq f(x*)$.
+
+O problema proposto neste trabalho é um problema de otimização multiobjetivo. Tais problemas possuem pelo menos duas função objetivos, e por isso precisam de um método de comparação de soluções mais elaborado. Estes problemas possuem a forma:
+\begin{align}
+  &\text{minimizar } f(x) = (f_1(x),\dots,f_k(x))\\
+  &\text{sujeito a } g_i(x) \leq b_i, i = 1, \dots, m
+\end{align}
+
+Ao invés de apenas uma única função objetivo, problemas multiobjetivos possuem um conjunto de função objetivo $f_1(x),\dots,f_k(x)$ que são igualmente importantes \cite{zitler04}. Então, uma solução para o problema não está relacionada a um único valor, mas a um vetor chamado \emph{vetor objetivo}. Como a representação da qualidade da solução mudou, é necesário usar um outro sistema de comparação, ao invés da simples comparação: $x$ é melhor que $y$ se e somente se $f(x) < f(y)$.
+
+No caso de múltiplas funções objetivo, precisamos usar o conceito de dominância de Pareto. Um vetor objetivo $f(x)$ domina outro vetor objetivo $f(y)$, ou $f(x) \succ f(y)$, se não há um componente de $f(x)$ maior que o componente correspondente em $f(y)$ e pelo menos um componente de $f(x)$ é menor que o componente correspondente em $f(y)$. Uma solução é chamada de ótima caso não haja nenhuma outra solução que a domine. Desta forma, podem haver muitas soluções ótimas que representam diferentes \emph{trade-offs} entre os objetivos.
+
+O conjunto de soluções ótimas em um problema multiobjetivo é chamado de \emph{conjunto de Pareto} e está relacionado a vetores objetivo. O conjunto destes vetores objetivo é chamado de \emph{fronteira de Pareto}. Então, otimização multiobjetivo busca obter todas as soluções no conjunto de Pareto para ajudar o tomador de decisão a escolher a melhor solução.
+
+\section{Motivação}
+Os desafios de criar um plano de ações em tempo-real são grandes, ainda mais em um ambiente dinâmico como um jogo RTS. O modelo estado-da-arte utilizado para o problema de produção de recursos \cite{chan07a} consegue agregar muitas características de um RTS, porém ele não possui nenhuma formulação matemática bem definida, nem consegue tratar como os suprimentos são utilizados em um ambiente real. Este modelo teve uma versão multiobjetivo apresentada por \citeonline{captain14}, mas não utilizou recursos como função objetivo, mas parâmetros de comparação com um estado-objetivo.
+
+Além disso, não é possível modelar de maneira natural as características da raça Zerg, o que o torna impraticável para uma raça de \emph{StarCraft}. Esta raça foi escolhida também por ser presumidamente mais difícil de se criar inteligências artificiais para ela \cite{ontanon13}. Os torneios da IEEE \emph{Conference on Computational Intelligence and Games} (IEEE CIG) não apresentaram inscrições de inteligências artificiais para a raça Zerg até a conferência de 2015, quando as três novas inteligências Zerg ganharam os três primeiros lugares.
+
+Como as estratégias dentro de um jogo podem mudar drasticamente, devido ao tamanho da árvore de possibilidades, o número de restrições e objetivos também deve ser variável. Esta variabilidade não é vista em nenhum modelo de planejamento que tenha sido utilizado em ambientes RTS.
+
+\section{Objetivo}
+O trabalho tem como objetivo princiapl propor um novo modelo de otimização que consiga unificar os modelos de planejamento de projeto com o modelo de planejamento \emph{online} para produção de recursos em RTS sob um foco multiobjetivo, procurando atender às características da raça Zerg.
+
+O modelo proposto é um problema de planejamento para produção multiobjetivo generalista. Embora tenha inspiração na raça Zerg, não é exclusivo à esta raça. O problema possui uma função objetivo em comum entre todos os casos, minimizar o tempo de conclusão das tarefas. Ao contrário do problema proposto por \citeauthor{chan07a}, mais do que chegar a um determinado estado escolhido, deseja-se otimizar a utilização dos recursos do jogo. Então, as funções objetivo adicionais são apenas recursos do sistema dado.
+
+Como problema multiobjetivo, não se procura apenas um estado ótimo, mas vários estados em que cada um apresente um \emph{trade-off} diferente entre o tempo e os recursos selecionados como funções objetivo.
+
+%\section{Trabalhos Relacionados}
+%O modelo proposto em \cite{chan07a} foi utilizado como base para os trabalhos de \citeonline{chan07b}, \citeonline{branq10}, \citeonline{captain14} e será descrito com mais detalhes na próxima seção. O modelo foi estendido \cite{chan07b} para acomodar \emph{means-end analysis} (MEA), de forma que o otimizador trabalhe mais rapidamente. Em \cite{branq10}, o modelo foi usado para a criação de um otimizador baseado no algorimo SLA*, que já foi utilizado para resolver problemas de escalonamento de projetos \cite{zamani98}. O trabalho feito em \cite{captain14} aborda de maneira multiobjetiva o modelo inicial, procurando otimizar três objetivos na busca por satisfazer um determinado estado-alvo: (a) minimizar o tempo total de sair do estado inicial para o estado final, (b) minimizar a diferença de recursos entre o estado final e os recursos necessários para se chegar ao estado-alvo, (c) minimizar o tempo necessário para se chegar do estado final ao estado-alvo.
+
+%O modelo deste trabalho possui semelhanças com o problema de planejamento de projetos, que foi discutido em vários trabalhos ao longo dos anos \cite{kolisch01}. Ele foi estendido para acomodar restrições de recursos e vários modos para as tarefas \cite{herroelen98}. Estes modelos, entretanto, não foram aplicados em um cenário de jogos em tempo real.
+
+
+
+\section{Contribuições}
+\begin{itemize}
+  \item Apresentação de um modelo para planejamento da produção e utilização de recursos de um jogo RTS;
+  \item Modelagem multiobjetivo generalista voltada para otimização do tempo de término, com quantidade variável de restrições e funções objetivo adicionais, para melhor atender as necessidades de uma determinada estratégia e capaz de ser utilizado em outros contexto além da raça Zerg em \emph{StarCraft};
+  \item Introdução de algoritmos baseados nas meta-heurísticas Algoritmo Genético, GRASP e Colônia de Formigas, bem como análise experimental dos resultados.
+\end{itemize}
+
+Como fruto deste trabalho, um artigo foi aceito na IEEE \emph{Conference on Evolutionary Computation} 2016 (IEEE CEC 2016), expondo o modelo apresentado nesta dissertação \cite{cfo16}.
+
+\section{Metodologia}
+Para confirmar a consistência do modelo proposto, quatro otimizadores foram implementados. Dois otimizadores são baseados em algoritmos genéticos, NSGA-II (\emph{Non-Dominated Sorting Genetic Algorithm}) e sua versão voltada a joelhos. Os outros otimizadores são o GRASP (\emph{Greedy Randomized Adaptve Search Procedure}) e o MOACO (\emph{Multi-Objective Ant Colony Optimization}). Dois tipos de algoritmos de criação de soluções foram projetados para os otimizadores, visando atender às quantidades variáveis de restrições e funções objetivo.
+
+Um conjunto de experimentos foi feito em 14 casos de teste, criados para este problema baseados na raça Zerg. Os casos de teste incluem estratégias consolidadas em ambientes de competição profissional, e estratégias para verificar o desempenho de acordo com a profundidade dos recursos de interesse. Para cada caso de teste, 30 execuções foram feitas. Indicadores de tempo e hipervolume \cite{beume09} foram usados para medir o desempenho dos algoritmos. Os otimizadores têm como objetivo final funcionarem em um cenário real e trabalhar em conjunto com uma inteligência artificial para o jogo \emph{StarCraft}, então o seu desempenho é crucial para um bom funcionamento da inteligência artificial.
+
+Para determinar os valores dos parâmetros de cada otimizador, uma corrida iterativa foi usada, através da ferramenta \emph{irace} \cite{irace}, em sete casos de teste baseados em estratégias usadas no início do jogo ao longo de 840 experimentos. Destes casos de teste, quatro foram usados nos experimentos finais.
+
+\section{Organização do trabalho}
+O restante deste trabalho está dividido em:
+\begin{itemize}
+	\item Capítulo 2: explicação e discussão sobre o problema de planejamento \emph{online} para produção de recursos em RTS;
+	\item Capítulo 3: explicação e discussão sobre o problema de planejamento de projetos;
+	\item Capítulo 4: introdução ao problema de planejamento de produção de recursos;
+	\item Capítulo 5: expansão do problema de produção de recursos com a adição de eventos cíclicos;
+	\item Capítulo 6: introdução ao algoritmo de geração de soluções;
+  \item Capítulo 7: descrição das meta-heurísticas usadas nos experimentos;
+  \item Capítulo 8: resultados dos experimentos;
+  \item Capítulo 9: conclusões e trabalhos futuros.
+\end{itemize}

@@ -1,0 +1,202 @@
+\chapter{Experimentos Computacionais}
+Para definir alguns parâmetros de cada otimizador, uma corrida iterativa \cite{irace} foi usada em sete casos diferentes ao longo de 840 experimentos. Os parâmetros que permaneceram estáticos para ambos otimizadores foram: o tamanho do arquivador, o número de iterações e os valores $\delta_p$, $\delta_c$, $\delta_m$. Cada otimizador rodou 10 iterações, com um arquivador de tamanho 8. Estes números baixos foram escolhidos para capturar o ambiente de tempo-real de uma inteligência artificial para jogos. Os valores para as variáveis de pré-requisito, custo e máximo são $\delta_p = 2$, $\delta_c = 0,5$ e $\delta_m = 1$.
+
+Assim, a corrida iterativa otimizou os seguintes parâmetros comuns a todos os otimizadores: $\delta_o$, $\delta_r$, $\Delta_o$, $\Delta_r$, $\delta_o^F$, $\delta_r^F$, $\Delta_o^F$, $\Delta_r^F$. Os valores encontrados (Tabela~\ref{tab:irace1}) tanto pelo NSGA-II como pela sua variante ``\emph{Knee}'' possuem valores mais baixos para todas as variáveis de conserto $\delta_o^F$, $\delta_r^F$, $\Delta_o^F$, $\Delta_r^F$ em relação às variáveis de criação  $\delta_o$, $\delta_r$, $\Delta_o$, $\Delta_r$, enquanto o MOACO e o MOGRASP possuem valores mais variados para as variáveis de conserto. Os intervalos dados para estas variáveis estão na Tabela \ref{tab:irace2}.
+
+\begin{table}
+\centering
+\caption{Intervalos de valores dos parâmetros comuns utilizados pelo \emph{irace}.}
+\label{tab:irace2}
+\begin{tabular}{c c c c c c c c}
+$\delta_o$ & $\delta_r$ & $\Delta_o$ & $\Delta_r$ & $\delta_o^F$ & $\delta_r^F$ & $\Delta_o^F$ & $\Delta_r^F$\\
+\hline
+[0,01; 10] & [1,01; 15] & [1; 2,6] & [1,2; 4] & [0,01; 7] & [1,01; 10] & [1; 3] & [1,2; 4]\\
+\end{tabular}
+%\end{table}
+
+\bigskip
+
+\caption{Parâmetros comuns encontrados para os otimizadores pelo \emph{irace}.}
+\label{tab:irace1}
+\begin{tabular}{l | c c c c c c c c}
+\textbf{Otimizador} & $\delta_o$ & $\delta_r$ & $\Delta_o$ & $\Delta_r$ & $\delta_o^F$ & $\delta_r^F$ & $\Delta_o^F$ & $\Delta_r^F$\\
+\hline
+NSGA-II & 2.73 & 2.81 & 2.1 & 2.44 & 1.48 & 1.66 & 1.63 & 1.78 \\
+Knee & 2.85 & 12.76 & 1.64 & 1.77 & 1.87 & 2.34 & 1.76 & 1.83\\
+MOACO & 3.84 & 6.93 & 2.27 & 3.13 & 3.71 & 4.45 & 2.96 & 3.47\\
+MOGRASP & 4.19 & 6.26 & 1.79 & 2.11 & 2.86 & 8.78 & 1.56 & 2.09\\
+\end{tabular}
+\end{table}
+
+Além dos parâmetros comuns, parâmetros específicos a cada otimizador foram encontrados pela corrida iterativa (Tabela \ref{tab:irace3}). Tanto o MOACO quanto o MOGRASP encontraram os mesmos valores para iterações da busca local e para o número de vizinhos visitados pela busca local. Embora não houvesse tanto espaço para variação na quantidade de vizinhos (Tabela \ref{tab:irace4}), a quantidade de iterações aponta que uma quantidade baixa de iterações na busca local seja melhor para estes algoritmos.
+
+\begin{table}[t]
+\centering
+\caption{Intervalos de valores dos parâmetros específicos utilizados pelo \emph{irace}.}
+\begin{tabular}{l | c c c c c c c c}
+\textbf{Otimizador} & $c$ & $ants$ & Iter. B.L. & Viz. B.L. & $\alpha$ & $\beta$ & $\rho$\\
+\hline
+NSGA-II & [1; 100] & --- & --- & --- & --- & --- & --- \\
+Knee & [1; 100] & --- & --- & --- & --- & --- & --- \\
+MOACO & --- & [1; 10] & [1; 10] & [1; 2] & [0; 5] & [0,5; 10] & [0,01; 1] \\
+MOGRASP & [1; 10] & --- & [1; 10] & [1; 2] & --- & --- & ---\\
+\end{tabular}
+\label{tab:irace4}
+\bigskip
+\caption{Parâmetros específicos encontrados para os otimizadores pelo \emph{irace}.}
+\begin{tabular}{l | c c c c c c c c}
+\textbf{Otimizador} & $c$ & $ants$ & Iterações B.L. & Vizinhos B.L. & $\alpha$ & $\beta$ & $\rho$\\
+\hline
+NSGA-II & 34 & --- & --- & --- & --- & --- & --- \\
+Knee & 72 & --- & --- & --- & --- & --- & --- \\
+MOACO & --- & 7 & 3 & 2 & 0,73 & 3,4 & 0,6 \\
+MOGRASP & 15 & --- & 3 & 2 & --- & --- & ---\\
+\end{tabular}
+\label{tab:irace3}
+\end{table}
+
+
+O desempenho de cada otimizador foi mensurado pelo seus tempos de execução e pelo indicador de hipervolume \cite{beume09}, após normalizar os valores de cada objetivo. Esta normalização teve como base os pontos extremos do conjunto não-dominado de todas as soluções produzidas pelo experimento. Os casos de teste foram baseados na raça Zerg de StarCraft, e utilizaram o estado inicial padrão do jogo. Testes estatísticos foram feitos para o hipervolume utilizando o teste U de Mann-Whitney.
+
+Os experimentos foram executados numa máquina com Debian 8.4 64-bit, Intel i7-4790K @ 4.00GHz, 16GB RAM. O código-fonte foi implementado em C++11 e compilado com g++ 4.9.2 usando a biblioteca OpenMP e a opção -Ofast. O processador possui quatro núcleos físicos e oito núcleos virtuais para processamento paralelo.
+
+\begin{table}
+\centering
+\caption{Funções objetivo e restrições adicionais para os casos de teste dos experimentos.}
+\begin{tabular}{c  c  c }
+\textbf{Caso de Teste} & \textbf{Funções Obj.} & \textbf{Restrições}\\
+\hline
+(a) & - & $Guardian$ uti. $\geq 1$\\
+\hline
+(b) & max. \emph{Minérios} utilizáveis & $Guardian$ uti. $\geq 1$\\
+\hline
+(c) & - & \begin{tabular}{c}$Mutalisk$ uti. $\geq 1$\\$Zergling$ uti. $\geq 1$\end{tabular}\\
+\hline
+(d) & max. \emph{Minérios} utilizáveis & \begin{tabular}{c}$Mutalisk$ uti. $\geq 1$\\$Zergling$ uti. $\geq 1$\end{tabular}\\
+\hline
+(e) & \begin{tabular}{c}max. \emph{Minérios} utilizáveis\\max. $Mutalisk$ utilizáveis\end{tabular} & \begin{tabular}{c}$Mutalisk$ uti. $\geq 1$\\$Zergling$ uti. $\geq 1$\end{tabular}\\
+\hline
+(f) & - & $Ultralisk$ uti. $\geq 1$\\
+\hline
+(g) & max. \emph{Minérios} utilizáveis & $Ultralisk$ uti. $\geq 1$\\
+\hline
+(h) & max. $Hydralisk$ utilizáveis & \begin{tabular}{c}$Hydralisk$ uti. $\geq 1$\\$Grooved\,Spines$ uti. $\geq 1$\end{tabular}\\
+\hline
+(i) & \begin{tabular}{c}max. \emph{Minérios} utilizáveis\\max. $Hydralisk$ utilizáveis\end{tabular} & \begin{tabular}{c}$Hydralisk$ uti. $\geq 1$\\$Grooved\,Spines$ uti. $\geq 1$\end{tabular}\\
+\hline
+(j) & max. \emph{Minérios} utilizáveis & \begin{tabular}{c}$Hydralisk$ uti. $\geq 1$\\$Hatchery$ uti. $\geq 3$\end{tabular}\\
+\hline
+(k) & - & \begin{tabular}{c}$Zergling$ uti. $\geq 1$\\$Metabolic\,Boost$ uti. $\geq 1$\end{tabular}\\
+\hline
+(l) & max. \emph{Minérios} utilizáveis & \begin{tabular}{c}$Zergling$ uti. $\geq 1$\\$Metabolic\,Boost$ uti. $\geq 1$\end{tabular}\\
+%\hline
+%(m) & max. $Zergling$ utilizáveis & \begin{tabular}{c}$Zergling$ uti. $\geq 1$\\$Metabolic\,Boost$ uti. $\geq 1$\end{tabular}\\
+\hline
+(m) & \begin{tabular}{c}max. \emph{Minérios} utilizáveis\\max. $Zergling$ utilizáveis\end{tabular} & \begin{tabular}{c}$Zergling$ uti. $\geq 1$\\$Metabolic\,Boost$ uti. $\geq 1$\end{tabular}\\
+\hline
+(n) & \begin{tabular}{c}max. \emph{Minérios} utilizáveis\\max. $Zergling$ utilizáveis\end{tabular} & $Zergling$ uti. $\geq 1$\\
+\end{tabular}
+\label{tab:inst}
+\end{table}
+
+Para avaliar o desempenho dos algoritmos, quinze casos de teste foram criados (ver Tabela~\ref{tab:inst}), baseados na raça Zerg e procuram medir a qualidade tanto de buscas em largura quanto das buscas em profundidade de cada otimizador. Na Tabela \ref{tab:inst}, a primeira coluna mostra o caso de teste, as funções objetivo adicionais estão relacionadas na segunda coluna, e a terceira coluna mostra as restrições adicionais. Estes casos foram criados para este trabalho como uma forma de mostrar, num cenário real, as capacidades dos algoritmos de fazer buscas em profundidade e em largura. Por isto, eles variam seus objetivos e restrições entre as unidades de maior nível tecnológico e a primeira unidade militar da raça. A maior parte dos casos de teste são versões de uma estratégia mono-objetivo e busca otimizar a quantidade de minérios utilizáveis, uma vez que é preciso ter um plano para caso o ataque seja bem sucedido ou não. Maximizando o estoque de minérios garante que há economia para manter produções de unidades e estruturas após a série de tarefas.
+
+Os casos (a) e (b) restringem o jogador a um ou mais \emph{Guardians}. Eles são as unidades militares voadoras de mais alto nível tecnológico, e requerem que outra unidade -- \emph{Mutalisk} -- evolua em um \emph{Guardian}. \emph{Mutaliss} é o primeiro tipo de unidade aérea dos Zerg e fica no meio da árvore tecnológica. Elas foram utilizadas pelos casos (c), (d) e (e). Os casos (f) e (g) requerem pelo menos um \emph{Ultralisk}, que é uma unidade militar terrestre do último nível tecnológico. Os casos (h), (i) e (j) requerem \emph{Hydralisks}, que são o segundo tipo de unidade militar terrestre, capazes de atirar em unidades terrestres e aéreas. Seu aprimoramento de alcance (\emph{Grooved Spines}) é obrigatória para um uso eficiente da unidade. O caso (j) requer a criação de duas \emph{Hatcheries} adicionais, e serve para avaliar o desempenho das buscas em largura. Para ser capaz de produzir uma \emph{Hydralisk}, é necessário ser capaz de produzir \emph{Zerglings}. \emph{Zerglings}, requeridos por todos os casos de teste, são a primeira unidade militar da raça e são normalmente usados em conjunto com \emph{Mutalisks}. Seu aprimoramento de movimentação (\emph{Metabolic Boost}) também é mandatória para o uso da unidade. Destes casos de teste, os casos (k), (l), (m) e (n) também foram utilizados na corrida iterativa como casos de aprendizado, em conjunto com outros dez casos.
+
+\begin{figure}
+  \centering
+  \includegraphics[angle=270,origin=c,scale=0.4]{Imagens/2hv.png}
+  \caption[Hipervolumes para as meta-heurísticas utilizadas.]{Hipervolumes para as meta-heurísticas utilizadas.}
+  \label{fig:hv}
+\end{figure}
+\begin{figure}
+  \centering
+  \includegraphics[angle=270,origin=c,scale=0.4]{Imagens/2time.png}
+  \caption[Tempo em segundos para os otimizadores testados.]{Tempo em segundos para os otimizadores testados. Asterisco indica que o algoritmo demorou mais que 500 segundos, mas retornou o conjunto de aproximação.}
+  \label{fig:time}
+\end{figure}
+
+\begin{table}
+  \centering
+  \caption[Ranking dos algoritmos baseado nas medianas de cada indicador.]{Ranking dos algoritmos baseado nas medianas de cada indicador. Menores indicadores mostram os melhores resultados.}
+  \begin{tabular}{l | c | c | c | c}
+    & \textbf{NSGA-II} & \textbf{Knee} & \textbf{MOACO} & \textbf{MOGRASP}\\
+    \hline
+    Hipervolume & 1,86 & \emph{1,5} & 2,86 & 3,57 \\
+    Tempo & \emph{1,07} & 2,71 & 3,64 & 2,57 \\
+  \end{tabular}
+  \label{tab:ranks}
+\end{table}
+
+Os resultados de hipervolume (ver Figura~\ref{fig:hv}) mostram a diferença entre os algoritmos. O desempenho dos otimizadores foi classificado na Tabela \ref{tab:ranks}. Quanto menor o valor dado ao otimizador, melhor ele foi no respectivo indicador. Nos testes feitos, o algoritmo que obteve melhor desempenho pelas medianas do indicador de hipervolume foi a variante do NSGA-II, ``Knee''. Enquanto o NSGA-II possui o melhor ranking das medianas dos tempos (ver Tabela \ref{tab:ranks}), e o segundo melhor desempenho em hipervolumes. Um dado que os rankings escondem é a discrepância entre os tempos que o ``Knee'' apresenta em casos que requerem \emph{Spire}\footnote{Estrutura que permite a criação de \emph{Mutalisks}.} e possuam funções-objetivo adicionais (ver Figura~\ref{fig:time}). Os tempos destes casos, (b) e (d), possuem medianas $1505,99s$ e $1048,01s$. Esta discrepância pode ser explicada pelo algoritmo de ordenação, que possui complexidade maior que o algoritmo de ordenação do NSGA-II. Porém, apenas a ordenação não consegue explicar os tempos similares que o algoritmo obteve nas instâncias que envolvem \emph{Hydralisks} e \emph{Zerglings}. Então, é mais provável que uma combinação das variáveis de geração de soluções e o algoritmo de ordenação tenha causado essa discrepância. O MOGRASP apresentou tempos parecidos com os tempos dos algoritmos genéticos, sendo mais lento pelo uso da busca local. Embora use busca local, seu desempenho nos hipervolumes foi o pior. MOACO por sua vez, foi consistentemente lento em todas as instâncias, embora tenha conseguido melhores resultados nos hipervolumes.
+
+\begin{table}
+  \centering
+  \caption[Resultado dos p-valores para o teste U de Mann-Whitney.]{Resultado dos p-valores para o teste U de Mann-Whitney. O teste foi feito nos conjuntos de hipervolumes de cada um dos otimizadores em comparação com os outros, para cada caso de teste. Valores em negrito indicam resultados estatisticamente diferentes.}
+  \footnotesize{
+  \begin{tabular}{c c c c || c c c c}
+  \hline
+    (a) & Knee & MOACO & MOGRASP          & (b) &Knee & MOACO & MOGRASP\\
+    NSGA-II & 0,7618 & 0,09611 & 0,3291   & NSGA-II & \bf 7,38E-6 & \bf 3,21E-16 & \bf 2,2E-16 \\
+    Knee& & 0,09037 & 0,3477              & Knee& & \bf 1,17E-4 & \bf 3,63E-12\\
+    MOACO & & & 0,7282                    & MOACO & & & \bf 4,58E-9\\
+  \hline
+  \hline
+    (c) &Knee & MOACO & MOGRASP           & (d) &Knee & MOACO & MOGRASP \\
+    NSGA-II & 0,5247 & 0,09611 & 0,3291   & NSGA-II & 0,3074 & \bf 1,11E-5 & \bf 1,55E-14 \\
+    Knee& & 0,7957 & \bf 0,01435          & Knee& & \bf 1,99E-10 & \bf 2,2E-16\\
+    MOACO & & & \bf 0,001507              & MOACO & & & \bf 1,99E-10\\
+  \hline
+  \hline
+  (e) & Knee & MOACO & MOGRASP                & (f) & Knee & MOACO & MOGRASP\\
+  NSGA-II & 0,5229 & \bf 8,9E-5 & \bf 1,4E-5  & NSGA-II & 0,3254 & 0,9175 & 0,7171\\
+  Knee & & \bf 2,8E-5 & \bf 8,68E-6           & Knee & & 0,1152 & 0,5741\\
+  MOACO & & & 0,8891                          & MOACO & & & 0,6572\\
+   
+  \hline
+  \hline
+  (g) & Knee & MOACO & MOGRASP                       & (h) & Knee & MOACO & MOGRASP\\
+  NSGA-II & \bf 3,25E-5 & \bf 3,12E-13 & \bf 2,2E-16 & NSGA-II & 0,8087 & \bf 0,02415 & \bf 3,98E-9\\
+  Knee & & \bf 3,78E-5 & \bf 2,2E-16                 & Knee & & 0,1393 & \bf 4,67E-8\\
+  MOACO & & & \bf 2,2E-16                            & MOACO & & & \bf 8,06E-10\\
+
+  \hline
+  \hline
+  (i) & Knee & MOACO & MOGRASP                  & (j) & Knee & MOACO & MOGRASP\\
+  NSGA-II & 0,7412 & \bf 2,23E-5 & \bf 9,16E-8  & NSGA-II & 0,4492 & \bf 3,09E-10 & \bf 1,29E-11\\
+  Knee & & \bf 2,67E-6 & \bf 2,42E-9            & Knee & & \bf 2,6E-5 & \bf 6,64E-9\\
+  MOACO & & & \bf 0,04621                       & MOACO & & & \bf 5,43E-5\\
+   
+  \hline
+  \hline
+  (k) & Knee & MOACO & MOGRASP                 & (l) & Knee & MOACO & MOGRASP\\
+  NSGA-II & 0,1395 & \bf 2,19E-1 & \bf 8,35E-1 & NSGA-II & \bf 1,63E-9 & \bf 3,21E-16 & \bf 2,2E-16\\
+  Knee & & 0,8259 & 0,1777                     & Knee & & \bf 5,96E-8 & \bf 5,75E-6\\
+  MOACO & & & 0,2294                           & MOACO & & & \bf 0,0008691\\
+   
+  \hline
+  \hline
+  (m) & Knee & MOACO & MOGRASP                 & (n) & Knee & MOACO & MOGRASP\\
+  NSGA-II & 0,592 & \bf 2,48E-12 & \bf 1,37E-8 & NSGA-II & \bf 0,04789 & \bf 2,2E-16 & \bf 8,78E-2\\
+  Knee & & \bf 3,89E-13 & \bf 2,42E-9          & Knee & & \bf 2,2E-16 & \bf 0,0008691\\
+  MOACO & & & 0,2539                           & MOACO & & & \bf 2,2E-16\\
+   
+  \hline
+  \end{tabular}
+  }
+  \label{tab:pvalue}
+\end{table}
+
+Uma análise dos resultados dos hipervolumes (ver Tabela \ref{tab:pvalue}) mostra que não há diferença estatística entre a maior parte dos pares de otimizadores em casos mono-objetivo, (a), (c) e (f). É possível observar que na maior parte dos casos, os algoritmos genéticos acabam produzindo resultados estatisticamente similares. Os resultados são mais diferentes conforme a quantidade de objetivos e a profundidade da busca aumentam, como nos casos (g), (l) e (n). Desta forma, pode-se perceber que o desempenho dos algoritmos, quando produzem resultados diferentes, favorece o NSGA-II. Ao mesmo tempo que nos casos que não há diferença estatística, o NSGA-II produz resultados mais rápidos.
+
+\begin{figure}
+  \centering
+  \includegraphics[scale=0.28]{Imagens/scatter.png}
+  \caption[Soluções encontradas pelas meta-heurísticas para o caso de teste (l).]{Soluções encontradas pelas meta-heurísticas para o caso de teste (l). O eixo vertical indica o estoque de minérios, enquanto o eixo horizontal indica o \emph{makespan} em segundos.}
+  \label{fig:scatter}
+\end{figure}
+
+A figura \ref{fig:scatter} mostra todas as soluções encontradas por cada otimizador ao longo de suas 30 execuções. É possível observar que os algoritmos genéticos possuem uma distribuição mais uniforme das soluções, enquanto o MOACO e o MOGRASP tendem a se concentrar na região próxima do tempo mínimo. O algoritmo ``\emph{Knee}'' possui uma abertura logo após esta região, e em seguida uma aglomeração de soluções. Este comportamento pode se dar pelo algoritmo de ordenação baseado em ângulos, que provavelmente identificou ângulos maiores na região da aglomeração, e ângulos menores na região vazia.
+
+Era esperado que algoritmos que possuem busca local terminassem em tempos maiores que os algoritmos genéticos, porém os resultados dos hipervolumes foram piores. Uma possível explicação se encontra no treinamento dado aos algoritmos, que pode ter resultado em valores ruins para as variáveis de criação e reconstrução de soluções. Os algoritmos MOACO e MOGRASP possuem um conjunto maior de variáveis que os algoritmos genéticos, então o \emph{iterated race} poderia ter diversificado a otimização em todas as variáveis, ao invés de intensificar nas variáveis de criação e reconstrução.
+

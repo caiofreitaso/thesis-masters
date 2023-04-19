@@ -1,0 +1,224 @@
+\chapter{Algoritmo de Geração de Soluções}
+Para criar soluções para o PPPREC, foi pensada uma maneira de transformar estas relações em um dígrafo, onde cada vértice é um recurso, evento ou tarefa, e as arestas representam as relações entre os vértices, como máximo por recurso ou pré-requisito. A Figura \ref{fig:grafo}.a mostra um exemplo de um dígrafo que é utilizado para representar um sistema. Nesta figura, as tarefas possuem custos em preto, produções em vermelho e usos em azul, recursos possuem gatilhos em verde e os eventos possuem produções em vermelho. Este grafo é reduzido em um multidígrafo de tarefas (ver Figura~\ref{fig:grafo}.b). Inicialmente, reduzindo os eventos e recursos em um único tipo de aresta, e então reduzindo todas as arestas em tarefas. As arestas correspondem a todas as relações entre recursos produzidos e as tarefas. Elas recebem um peso associado aos objetivos e restrições do modelo $M$. Com este multidígrafo base, pode-se calcular o valor associado a cada tarefa em um determinado estado.
+
+\begin{figure}[ht]
+  \centering
+  \begin{tabular}{c}
+  \scalebox{0.65} {
+    \begin{tikzpicture}[->, shorten >=1pt,auto,ultra thick]
+      \tikzstyle{vertex}=[rectangle,fill=black!20,minimum size=1cm,node distance=3cm,align=center]
+      \tikzstyle{event}=[circle,fill=black!20,minimum size=1cm,node distance=3cm,align=center]
+      \tikzstyle{task}=[rectangle,fill=black!40,minimum size=1cm,node distance=3cm,align=center]
+      \node[vertex] (r0) {Ouro};
+      \node[vertex] (r1) [right of=r0] {Trabalhador};
+      \node[vertex] (r2) [right of=r1] {Quartel};
+      \node[vertex] (r3) [right of=r2] {Soldado};
+      \node[event] (e0) [above of=r1] {Minerar};
+      
+      \node[task] (t0) [below of=r1] {Fazer Trab.};
+      \node[task] (t1) [right of=t0] {Fazer Quartel};
+      \node[task] (t2) [right of=t1] {Fazer Sold.};
+      \path
+        (e0) edge [bend left=0,color=red,dashed] node { } (r0)
+        (r1) edge [bend right=0,color=black!20!green] node { } (e0)
+        (t0) edge [bend left=0] node { } (r0)
+        (t0) edge [bend left=0, color=red] node { } (r1)
+        (t1) edge [bend left=0] node { } (r0)
+        (t1) edge [bend left=0, color=red] node { } (r2)
+        (t1) edge [bend left=0, color=blue] node { } (r1)
+        (t2) edge [bend left=0] node { } (r0)
+        (t2) edge [bend left=0, color=red] node { } (r3)
+        (t2) edge [bend left=0, color=blue] node { } (r2);
+    \end{tikzpicture}
+  }\\
+  \small{(a)}\\
+  \hline
+  \\
+  \scalebox{0.7} {
+    \begin{tikzpicture}[->, shorten >=1pt,auto,ultra thick]
+    \tikzstyle{vertex}=[rectangle,fill=black!20,minimum size=1cm,node distance=3cm,align=center]
+      \tikzstyle{task}=[rectangle,fill=black!40,minimum size=1cm,node distance=3cm,align=center]
+      \node[task] (T0) {$\theta_0$};
+      \node[task] (T1) [right of=T0] {$\theta_1$};
+      \node[task] (T2) [right of=T1] {$\theta_2$};
+      \path 
+        (T1) edge [bend left=60] node {$w_{cost}$} (T0)
+        (T1) edge [bend left=0, color=blue] node {$w_{borrow}$} (T0)
+        (T2) edge [bend right=50] node {$w_{cost}$} (T0)
+        (T2) edge [bend left=0, color=blue] node {$w_{borrow}$} (T1);
+    \end{tikzpicture}
+  }\\
+  \small{(b)}
+  \end{tabular}
+  \caption[Representação de um sistema de um jogo simples de coleta de recursos
+  e produção de unidades.]{Representação de um sistema de um jogo simples de coleta de recursos
+  e produção de unidades. (a) Grafo no estado inicial, mostrando todo o sistema do problema. (b)
+  o multidígrafo correspondente, com os pesos para cada tarefa e tipo de relação.
+  O círculo representa o evento do sistema e a aresta verde sua relação com o gatilho, as arestas vermelhas representam as produções, as arestas pretas representam os custos, as azuis representam os usos.}
+  \label{fig:grafo}
+\end{figure}
+
+Para reduzir o  grafo, inicialmente unem-se os eventos aos seus gatilhos, eliminando assim um tipo de vértice. No exemplo da figura 5.a, \emph{Minerar} é unido com \emph{Trabalhador}. Então cada recurso é fundido com os recursos que os produzem. No exemplo, o \emph{Ouro} é fundido com \emph{Trabalhador}. Finalmente, os recursos são unidos às tarefas que os produzem. \emph{Trabalhador} é unido com \emph{Fazer Trabalhador}, \emph{Quartel} une-se com \emph{Fazer Quartel} e \emph{Soldado} é fundido com \emph{Fazer Soldado}. As arestas sempre saem das tarefas para os recursos, dos recursos para os eventos (gatilhos) e dos eventos para recursos (produção). Este grafo reduzido pode ser calculado em tempo de pré-processamento e utilizado como base para cálculos futuros.
+
+Como cada recurso pode possuir uma necessidade distinta (seja como objetivo ou restrição), as tarefas recebem um peso inicial para cada objetivo ou restrição cuja produção, custo e consumo que ajudem ou atrapalhem. No exemplo da Figura \ref{fig:grafo}, uma estratégia que necessitasse de \emph{Ouro} como objetivo aumentaria o peso de \emph{Fazer Trabalhador} enquanto reduziria o peso das outras tarefas. Este peso é calculado com base nas relações que os recursos consumidos ou produzidos possuem com os recursos-alvo (restritivos ou objetivo) e o quanto cada efeito (i.e. produção ou consumo) vai mudar os valores dos recursos. Então, cada tarefa repassa o seu peso (caso seja favorável) para as outras tarefas da qual dependa, por cada uma de suas arestas. Os pesos não são passados mais de uma vez para um mesmo vértice através do mesmo tipo de aresta. Como existem vários tipos de arestas, é recomendado haver pesos distintos para cada tipo, a fim de criar o viés desejado para a solução.
+
+Uma vez que os recursos do estado atual podem cumprir alguns pré-requisitos, é interessante podar o grafo de forma que as tarefas que já tenham seu pré-requisito cumprido não passem informações erradas. Este procedimento também pode ser feito em arestas ligadas a seu uso, já que as arestas estão relacionadas com a existência de números mínimos de alguns recursos.
+
+Como o cálculo é feito a partir de um estado arbitrário, é possível gerar uma solução ao utilizar este método iterativamente. Ao utilizar o estado inicial do problema e uma solução vazia (i.e. sem tarefas enfileiradas), pode-se adicionar tarefas a esta solução inviável progressivamente utilizando o estado final da solução inviável anterior como entrada, e escolhendo uma das tarefas de alto valor até que se possua uma solução que atenda a todas as restrições. Para acelerar a intensidade da busca pela satisfação de restrições, é recomendado um aumento progressivo, a cada iteração, dos pesos iniciais relacionados a elas.
+
+\section{Valoração de Tarefas}
+
+O algoritmo \ref{alg:weights} tem como função atribuir valores entre zero e um para cada uma das tarefas que podem contruibuir para a satisfação das restrições e melhoramento dos objetivos. Para isto, ele precisa do estado $I_0$ e da estratégia $O$ como base, além de pesos relacionados aos benefícios trazidos pela execução de cada tarefa. Os pesos e seus significados são:
+\begin{itemize}
+  \item $\delta_o$: contribuição para o objetivo;
+  \item $\delta_r$: contribuição para restrições;
+  \item $\delta_p$: contribuição para pré-requisitos e usos de tarefas úteis;
+  \item $\delta_c$: contribuição para custos e consumos de tarefas úteis;
+  \item $\delta_m$: contribuição para o aumento do máximo possível de um recurso
+  produzido por tarefas úteis.
+\end{itemize}
+
+\begin{algorithm}[t]
+\begin{algorithmic}[1]
+\Function{pesoTarefa}{$\delta$, $I_0$, $task$, $r$}
+  \State $peso \gets 0$
+    \If{\Call{$tarefa$.producao}{$r$}}
+      \State $peso \gets peso + \delta$
+    \EndIf
+    \If{\Call{$task$.custo}{$r$}}
+      \State $peso \gets peso - \frac{\delta}{2}$
+    \EndIf
+    \If{\Call{$task$.consumo}{$r$}}
+      \State $peso \gets peso - \frac{\delta}{2}$
+    \EndIf
+  \State \Return $peso$
+\EndFunction
+\end{algorithmic}
+\caption{Função que atribui o peso a uma tarefa $task$ baseada numa contribuição $\delta$}
+\end{algorithm}
+
+\begin{algorithm}[t]
+\begin{algorithmic}[1]
+\Function{pesosIniciais}
+{$\delta_o$, $\delta_r$, $I_0$, $O$}
+\State $inicial \gets \{\}$
+\ForAll{$i \in T$}
+  \State $inicial[i] \gets 0$
+  \ForAll{$o \in M$}
+    \State $inicial[i] \gets inicial[i] +$ \Call{pesoTarefa}{$\delta_o$,$I_0$,$i$,$o$}
+  \EndFor
+  \ForAll{$o \in N$}
+    \State $inicial[i] \gets inicial[i] +$ \Call{pesoTarefa}{$-\delta_o$,$I_0$,$i$,$o$}
+  \EndFor
+  \ForAll{$o \in U$}
+    \If{$I_0[o] \leq k_o$}
+      \If{$o \in \{ C_{r0} | r \in R \}$ \textbf{ou} $o \in \{ U_{r0} | r \in R \}$}
+        \State $inicial[i] \gets inicial[i] +$ \Call{pesoTarefa}{$\delta_r$,$I_0$,$i$,$o$}
+      \Else
+        \State $inicial[i] \gets inicial[i] +$ \Call{pesoTarefa}{$-\delta_r$,$I_0$,$i$,$o$}
+      \EndIf
+    \EndIf
+  \EndFor
+  \ForAll{$o \in V$}
+    \If{$I_0[o] \geq l_o$}
+      \If{$o \in \{ C_{r0} | r \in R \}$ \textbf{ou} $o \in \{ U_{r0} | r \in R \}$}
+        \State $inicial[i] \gets inicial[i] +$ \Call{pesoTarefa}{$-\delta_r$,$I_0$,$i$,$o$}
+      \Else
+        \State $inicial[i] \gets inicial[i] +$ \Call{pesoTarefa}{$\delta_r$,$I_0$,$i$,$o$}
+      \EndIf
+    \EndIf
+  \EndFor
+\EndFor
+\EndFunction
+\end{algorithmic}
+\caption{Algoritmo para valoração inicial de tarefas em um estado $I_0$ segundo uma estratégia $O$.}
+\label{alg:weights}
+\end{algorithm}
+
+\begin{algorithm}[t]
+\begin{algorithmic}[1]
+\Procedure{valoresTarefas}
+{$I_0$, $O$, $\delta_o$, $\delta_r$, $\delta_p$, $\delta_c$, $\delta_m$}
+
+\State $inicial \gets$ \Call{pesosIniciais}
+  {$\delta_o$, $\delta_r$, $I_0$, $O$}
+\State $pesos \gets inicial$
+\State $grafo \gets$ \Call{grafoInicial}{$S$}
+\State \Call{podarGrafo}{$prerequisitos$}
+\State \Call{podarGrafo}{$uso$}
+\State \Call{ponderarGrafo}{$grafo$, $I_0$, $\delta_p$, $\delta_c$, $\delta_m$}
+\ForAll{$i \in T$}
+  \If{$inicial[i] > 0$}
+    \State \Call{passarValores}
+      {$i$, $\delta_p$, $\delta_c$, $\delta_m$, $pesos$}
+  \EndIf
+\EndFor
+\ForAll{$i \in T$}
+  \If{\Call{impossivel}{$I_0$, $i$}}
+    \State $inicial[i] \gets -\infty$
+  \EndIf
+\EndFor
+\State $diferenca \gets$ \Call{greatestNegative}{$pesos$}
+\State \Call{add}{$pesos$, $diferenca$}
+\State \Call{normalizar}{$pesos$, $x > 0$}
+\State \Return $pesos$
+\EndProcedure
+\end{algorithmic}
+\caption{Algoritmo de valoração de tarefas em um estado $I_0$ segundo uma estratégia
+  $O$.}
+\label{alg:weights}
+\end{algorithm}
+
+O funcionamento do algoritmo \ref{alg:weights} começa com a aquisição de valores iniciais para cada tarefa através da função $initialWeights$. Estes valores iniciais são dados por uma função que atribui às tarefas um valor ($\delta_o$) para cada recurso produzido que ajude nos objetivos e uma penalidade ($\delta_o/2$) para cada recurso-objetivo consumido. Estes bônus e penalidades também são calculados para os recursos gerados por eventos engatilhados pela tarefa em questão. O mesmo é feito para as restrições, utilizando os valores atuais dos recursos em $I_0$ para comparação e um outro valor de peso, $\delta_r$.
+
+Então, cria-se um novo grafo sem as arestas de relações já cumpridas. As arestas restantes recebem um valor correspondente ao tipo de relação. Considerando a aresta saindo de uma tarefa $t$ e indo para uma tarefa-alvo $a$, estes vértices estão ligados devido a dois recursos, $r$ e $s$, produzidos respectivamente por $t$ e $a$. O valor associado à aresta depende de um peso $\delta$, do bônus associado à tarefa-alvo $B$ e da necessidade da tarefa atual $C$. Para pré-requisitos, uso, custo e consumo, os valores de $B$ são iguais à produção do recurso $s$ ($P_{as}$). A necessidade $C$ é igual a $Pr_{tr}$, $Bo_{tr}$, $Ct_{tr}$, $Cm_{tr}$, respectivamente. Nestes casos, $r = s$. Porém quando a tarefa $a$ gera um recurso $s$ que aumente o máximo do recurso $r$ produzido por $t$, o cálculo muda levemente. $B$ passa a ser $MU_{rs}$, a quantidade de unidades de $r$ que podem ser produzidas para cada unidade de $s$, e $C$ é a produção de $s$, $P_{as}$. Caso qualquer dos recursos $s$ produza, através de eventos, o recurso necessário a $t$, então o valor é dado por uma constante, uma vez que os cálculos envolvendo eventos se tornam complicados. Utilizamos aqui a constante $\sigma = 0,3$.
+
+Para finalizar o cálculo, é preciso saber do impacto que será causado pela tarefa escolhida. Isto se dá com base num valor $A$, que depende do tipo de relação. Para pré-requisito, $A = Pr_{tr} - U_{r0}$. Para uso, $A = Bo_{tr} - (U_{r0} - B_{r0})$.  Para custo e consumo, $A = U_{r0}$. Para máximos, $A = max_r(I_0) - U_{r0}$. Com isto, o valor da aresta $e$ se dá pela função \ref{eq:w}, onde $\sigma$ indica a produção cíclica de necessidades, a tangente hiperbólica indica um valor referente à razão da produção pela demanda, e a última razão indica a influência da produção dos recursos necessários no estado atual.
+\begin{equation}
+\label{eq:w}
+w_{e} = \delta
+  \left[
+    \sigma +
+    \left(
+      tanh\left(\frac{B_e}{C_e}\right)
+      \frac{B_e}{B_e + A_e}
+    \right)^2
+  \right]
+\end{equation}
+
+Quando todos os elementos do grafo possuírem um valor, as tarefas que possuem um valor de contribuição inicial maior que zero serão selecionadas. Para cada uma dessas tarefas, o valor inicial de uma tarefa-origem $o$ é passado para suas dependências, de forma que a tarefa-destino $t$ possua um valor final $v_t = v_t + w_ev_o^0$, onde $w_e$ é o peso da aresta e $v_o^0$ é o valor inicial da tarefa que está repassando seu peso. Isto é feito para todas as tarefas que possuem um valor inicial maior que zero, isto é, que possuem uma contribuição aceitável no estado $I_0$.
+
+Após este cálculo, as tarefas impossíveis de serem feitas no estado $I_0$ recebem valor $-\infty$. O maior valor negativo, não infinito, é somado a todos os valores. Então, os valores positivos são normalizados, pois apenas estes serão considerados na hora de selecionar a próxima tarefa da solução. Esta soma se dá para que apenas tarefas que apresentem um benefício maior que seu prejuízo estejam no conjunto selecionável.
+
+\section{Criação de Soluções}
+Uma vez que o algoritmo de valoração é feito para selecionar uma tarefa a partir de um único estado inicial $I_0$, um método iterativo é necessário para produzir uma solução viável para a estratégia $O$. O algoritmo~\ref{alg:create} mostra o processo de criação de soluções. Para guiar o algoritmo, os valores para restrições e objetivos são aumentados a cada iteração por um fator $\Delta$. O algoritmo seleciona uma tarefa aleatoriamente, através de uma roleta, dentre as tarefas valoradas positivamente pelo algoritmo anterior. Este processo é repetido até que a solução seja válida ou o tempo de início da última tarefa ($S_{max}(x)$) exceda o tempo limite $UB$ definido na estratégia $O$. Caso o tempo seja maior, o algoritmo reduzirá o tamanho da solução progressivamente para tentar corrigir erros, que podem ser causados por um posicionamento tardio de alguma dependência (como pré-requisitos). Este algoritmo supõe um modelo com soluções válidas. Caso o tempo seja curto demais para uma solução válida aparecer, o algoritmo entrará em um \emph{loop}, sem conseguir adicionar nenhuma tarefa à solução.
+
+\begin{algorithm}[t]
+\begin{algorithmic}[1]
+\Procedure{criar}
+{$I_0$, $O$, $\delta_o$, $\delta_r$, $\delta_p$, $\delta_c$, $\delta_m$, $\Delta_o$, $\Delta_r$}
+\State $x \gets \{\}$
+\State $r \gets 1$
+\While{\Call{naoValido}{$x$, $O$}}
+  \State $valores \gets$ \Call{valoresTarefas}
+    {$I_0$, $O$, $\delta_o$, $\delta_r$, $\delta_p$, $\delta_c$, $\delta_m$}
+  \State $\delta_o \gets \delta_o \Delta_o$
+  \State $\delta_r \gets \delta_r \Delta_r$
+  \State $x \gets x$ $\cup$ \Call{roleta}{valores}
+  \If{$S_{max}(x) > UB$}
+    \State $tamanho \gets$ \Call{$x.$tamanho}{}
+    \State \Call{$x$.redimensionar}{$tamanho - r$}
+    \State $r \gets r + 1$
+    \If{$r >$ \Call{$x.$tamanho}{}}
+      \State $r \gets 1$
+    \EndIf
+  \EndIf
+\EndWhile
+\State \Return $x$
+\EndProcedure
+\end{algorithmic}
+\caption{Algoritmo de geração de soluções para um estado $I_0$ e uma estratégia $O$.}
+\label{alg:create}
+\end{algorithm}
+
+Este algoritmo também pode ser utilizado para correção de soluções inválidas. A mudança de soluções através de operações de vizinhança comumente as torna inválidas, e.g. troca de posição entre requisito e requerente. Para validar uma solução, sua cauda é cortada: a partir da primeira solução inválida até o final da solução. Então, a solução é reconstruída usando o algoritmo de criação, passando o estado final da solução podada como estado inicial. Como o foco desta aplicação é a validação de uma solução, é recomendado o uso de pesos maiores para restrições em relação aos pesos dos objetivos, para que a solução cumpra cada restrição mais rápido. 

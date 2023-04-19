@@ -1,0 +1,400 @@
+\chapter{Problemas Propostos}
+Neste capítulo, os dois novos problemas propostos para produção de recursos são discutidos. O primeiro problema, problema de planejamento para produção de recursos (PPPR), busca apenas unificar os dois problemas discutidos no capítulo anterior com algumas das mudanças discutidas. Em seguida, uma extensão deste problema é apresentada -- o problema de planejamento para produção de recursos com eventos cíclicos (PPPREC). Esta extensão é a base do restante do trabalho, servindo como foco para os algoritmos de otimização utilizados nos experimentos.
+
+\section{Problema de Planejamento para Produção de Recursos}
+O problema de planejamento para produção de recursos (PPPR) é definido por três variáveis: o sistema $S$, o estado inicial $I_0$ e a estratégia $O$. De uma forma mais detalhada, o sistema $S=\langle R, T \rangle$ é uma dupla que possui: (a) o conjunto de recursos $R$ e (b) o conjunto de tarefas $T$. Recursos representam os objetos (como unidades e estruturas) e valores (como dinheiro e capacidade de suprimento) que são manipulados pelas tarefas durante o jogo. As tarefas são as ações que o jogador pode realizar para criar e consumir recursos.
+%Já os eventos são ações periódicas que iniciam automaticamente ao criar um tipo de recurso, como por exemplo a coleta de recursos periódica inicializada ao produzir um trabalhador.
+
+O estado inicial $I_0$ deve conter as informações sobre o total coletado e consumido de cada recurso $r \in R$,
+%as informações sobre quais eventos estão ativos e seus tempos de início, 
+além do tempo restante para conclusão das tarefas em progresso. Por ser um problema de otimização, é necessária uma fotografia do estado do sistema ($I_0$) para servir como base para aplicar certos operadores determinísticos (tarefas).
+
+As próximas seções irão descrever os recursos, %eventos, 
+tarefas, bem como estratégia $O$, além de apresentar um exemplo de caso do problema.
+
+\subsection{Recursos}
+Ao contrário do problema de planejamento de projetos, todos os recursos podem ser tanto não-renováveis como renováveis. A diferenciação ocorre apenas para tarefas que utilizam recursos como renováveis ou não.
+
+Os recursos possuem atributos que determinam algumas restrições sobre o quanto pode-se produzir. Seus atributos são:
+\begin{itemize}
+\item \emph{Máximo coletável}: determina quanto de um determinado recurso pode ser produzido a qualquer momento do jogo. Para saber quanto de um recurso é utilizável em um determinado estado jogo é necessário saber quanto do recurso já foi coletado até o momento e quanto foi gasto.% Isto significa que há a necessidade de saber quantos recursos foram coletados até o momento, e quantos foram gastos também, para dizer quantos recursos utilizáveis existem em um determinado estado.
+
+\item \emph{Máximo utilizável por recurso}: determina a quantidade máxima de recursos em estoque de um determinado recurso, regulada pela quantidade em estoque de outros recursos.
+\item \emph{Equivalência}: determina a equivalência entre recursos como pré-requisitos de uma tarefa.
+\end{itemize}
+
+Para facilitar a manipulação de recursos, três atributos são usados para definir cada recurso em um tempo $t$.
+\begin{itemize}
+\item $C_{rt}$ indica o total coletado do recurso $r$ a partir do estado $I_0$ até o tempo $t$.
+\item $u_{rt}$ indica o total consumido do recurso $r$ a partir do estado $I_0$ até o tempo $t$.
+\item $U_{rt}$ indica a quantidade utilizável do recurso $r$ no tempo $t$.
+\end{itemize}
+
+Uma vez que o total coletado não pode ser maior que o máximo coletável deste recurso, temos que utilizar o valor correto em nossos cálculos. Tarefas %e eventos
+podem possuir valores de produção que não permitam que o $C_{rt}$ seja igual ao máximo coletável em algum tempo $t$. %Além disso, eventos são cíclicos e ininterruptos.
+A forma mais simples de eliminar este problema é adotar o máximo coletável como limite superior para o valor de $C_{rt}$. Assim, para qualquer recurso $r \in R$, em qualquer tempo $t$, temos que:
+\begin{align}
+  &\bar{C}_{rt} = min\{C_{rt}, MC_r\}\\
+  &U_{rt} = \bar{C}_{rt} - u_{rt}
+\end{align}
+
+Onde $\bar{C}_{rt}$ é o total coletado real do recurso $r$, $MC_r$ é o máximo coletável de $r$. Além disso, a restrição 4.3 deve ser atendida em qualquer tempo $t$.
+\begin{equation}
+    U_{rt} \leq \sum_{s\in R}^{s \neq r} MU_{rs} U_{st}
+\end{equation}
+
+$MU_{rs}$ indica o máximo utilizável do recurso $r$ por unidade de outro recurso $s$.
+
+
+
+\subsection{Tarefas}
+As tarefas, ou ações, possuem relações com os recursos, ao invés de relações entre si como os próprios recursos possuem. Além destas relações, tarefas possuem o atributo ``duração''. Os atributos das tarefas são listados a seguir.
+\begin{itemize}
+\item \emph{Duração}: tempo entre o início da tarefa e sua conclusão. Representado pelo símbolo $d_i$.
+\item \emph{Pré-requisito}: quantidade de recursos necessária para o início desta tarefa. Estes recursos não são usados. As equivalências de recursos são verificadas apenas neste contexto. Representado pelo símbolo $Pr_{ir}$.
+\item \emph{Custo}: quantidade de recursos a serem consumidos no início da tarefa. Representado pelo símbolo $Ct_{ir}$.
+\item \emph{Consumo}: quantidade de recursos a serem consumidos no término da tarefa. Estes recursos são imobilizados pela duração da tarefa e não poderão ser utilizados ou consumidos neste período. Representado pelo símbolo $Cm_{ir}$.
+\item \emph{Uso}: quantidade de recursos que estarão imobilizados até o fim da tarefa porém sem serem consumidos. Estes recursos não poderão ser utilizados ou consumidos por outras tarefas. Representado pelo símbolo $Bo_{ir}$.
+\item \emph{Produção}: quantidade de recursos que serão gerados após o término da tarefa. Representado pelo símbolo $Pr_{ir}$.
+\end{itemize}
+
+Os atributos ``custo'', ``consumo'' e ``produção'' indicam alterações nos recursos consumidos ($u_{rt}$) e nos recursos coletados ($C_{rt}$). Isto significa que é possível modelar sistemas em que tarefas tenham valores negativos para certos atributos, que podem gerar sequências de ações não-triviais, ao se considerar os máximos de cada recurso ($MC_r, MU_{rs}$).
+
+Para que uma tarefa possa ser executada em um determinado estado, ele deve possuir, pelo menos, a quantidade de recursos indicada em cada uma de suas relações de dependência: pré-requisitos, custos, consumos e usos. Importante notar que o consumo de pré-requisitos após o início de uma tarefa não a invalida neste problema, isto é, os pré-requisitos precisam ser válidos apenas no instante inicial da tarefa. Junto com as dependências de recursos também existe a dependência temporal, em que uma ação deve demorar exatamente o tempo prescrito em sua definição. Estas afirmações podem ser expressas nas restrições 4.4 e 4.5, onde $Pr_{ir}$, $Ct_{ir}$, $Cm_{ir}$, $Bo_{ir}$ são os pré-requisitos, custos, consumos e usos da tarefa $i \in T$ em relação ao recurso $r \in R$, respectivamente. $E_{sr}$ representa a equivalência entre os recursos $r$ e $s$. $B_{rt}$ indica a quantidade do recurso $r$ imobilizada no tempo $t$. Além disso, temos que $d_i$ indica a duração da tarefa $i$.
+\begin{align}
+  &max\{ U_{rt}, E_{sr}U_{st} | s \in R \} \geq Pr_{ir}\\
+  &U_{rt} - B_{rt} \geq Ct_{ir} + Cm_{ir} + Bo_{ir}
+\end{align}
+
+
+\subsection{Modelo}
+Este problema recebe como entrada o sistema $S = \langle R,T \rangle$, o estado inicial $I_0$ e a descrição da estratégia $O = \langle M, N, U, V, K, L, UB \rangle$.
+A descrição da estratégia, $O$, possui seis conjuntos e um valor inteiro.
+Os conjuntos $M$ e $N$ possuem as funções de maximização e minimização, respectivamente. Estes conjuntos não podem se intersectar, $N \cap M = \emptyset$.
+Os conjuntos $U$ e $V$ possuem as funções de restrição referentes a mínimos e máximos, respectivamente.
+Os conjuntos $K$ e $L$ possuem os valores das restrições referentes a mínimos e máximos, respectivamente.
+Por tratarem da mesma quantidade de restrições, $|U| = |K|$ e $|V| = |L|$.
+$UB$ é o horizonte de tempo.%tempo máximo para execução da ordem de tarefas $x$.
+
+Antes de descrever o modelo, é necessário explicar quais valores serão otimizados.
+Utilizaremos a notação $y_f$ para denotar o valor da função $f(x,I_0,UB)$.
+Este valor é capturado ou no tempo final da execução das tarefas prescritas na variável de decisão $x$ partindo do estado inicial $I_0$, ou no tempo $UB$ caso a última tarefa termine após o tempo máximo. Desta forma, é possível verificar quais ações podem ser iniciadas durante o tempo.
+A função $f$ pode ser um dos seguintes atributos de algum recurso $r \in R$: (a) total coletado, (b) total consumido, e (c) quantidade utilizável.
+Portanto, podem existir até três funções para cada recurso.
+Por exemplo, em \emph{StarCraft} pode-se minimizar o total coletado de gás vespeno para forçar pouco tempo de coleta de gás e mais tempo de mineração, além de exigir uma quantidade utilizável mínima de unidades militares.
+%Também é possível minimizar o total consumido de minérios para garantir eficiência nos gastos, pois pode não haver uma correlação entre os gastos e o tempo consumido, de forma que minimizar ambos seja justificável.
+
+
+O modelo simplificado para otimização deste problema está descrito de 4.6 a 4.11.
+\begin{align}
+  &\text{minimizar } min\left\{C_{max}, UB\right\}\\
+  &\text{maximizar } y_m, \forall m \in M\\
+  &\text{minimizar } y_n, \forall n \in N%, N \cap M = \emptyset
+\end{align}
+sujeito a
+\begin{flalign}
+  &S_{max} \leq UB\\
+  &y_u > k_u, \forall u \in U\\
+  &y_v < l_v, \forall v \in V%\\
+  %&|M| + |N| + |U| + |V| \geq 1%\\
+  %&UB > 0
+\end{flalign}
+
+A variável $C_{max}$ guarda o tempo de conclusão da última tarefa de $x$. Porém, o planejamento ainda pode ser útil caso a última tarefa não termine em tempo hábil, uma vez que uma ordem de tarefas que não conclua a última tarefa ainda modifica o estado do jogo no tempo $UB$. Neste caso, o tempo máximo $UB$ é utilizado e o estado do jogo no tempo $UB$ pode ser considerado na otimização. Isto só é possível caso o tempo de começo da última tarefa, $S_{max}$, esteja dentro do limite determinado (equação 4.9). Uma função de avaliação poderia aplicar cortes em uma ordem de tarefas $x$ de forma que a função retorne uma ordem $x_f$ que possua todas as tarefas em $x$ que podem ser começadas até $UB$.
+
+Em cenários multiobjetivo, o tempo máximo $UB$ pode se tornar mais importante. Devido ao grande número de possibilidades que o espaço de soluções tem, reduzir a otimização à uma janela de tempo específica pode se tornar mais útil tanto pelo tempo de processamento como pela quantidade de soluções ótimas. Soluções que demorem muito podem ser tão inúteis quanto soluções que não satisfaçam às outras restrições.
+
+Estes cenários também expõem os \emph{trade-offs} entre os recursos e o tempo. Utilizando \emph{StarCraft} como exemplo, podemos elaborar um modelo que vise minimizar o $makespan$ e maximizar a quantidade utilizável de minérios. Neste exemplo, não há uma ligação simples entre o tempo que a ordem de tarefas leva para ser feita e a quantidade utilizável de minérios, pois o estoque de minérios depende de: (a) quantidade de trabalhadores minerando, (b) o tempo que cada trabalhador passa minerando e (c) quanto de minério foi gasto.
+
+Além dos objetivos personalizados, o problema também apresenta restrições personalizadas. Estas restrições são semelhantes ao que se busca em uma programação de metas, como feito em \citeonline{captain14}, no sentido que elas dão um estado-objetivo mínimo para as soluções ótimas de um caso. Por exemplo, se uma restrição for ``quantidade utilizável de trabalhadores maior que 5'', temos que todas as soluções ótimas devem obedecer esta restrição.
+
+A personalização é necessária %(ver restrição 4.12), 
+pois, caso contrário, não haveria direção para o otimizador: fazer nada (uma solução com nenhuma tarefa) seria a solução ótima. Ao colocar ao menos uma restrição ou função objetivo, o otimizador pode encontrar soluções coerentes.
+
+Este modelo simplificado apresenta apenas as restrições personalizadas, além das funções objetivo do problema. Porém, existem outras restrições referentes ao funcionamento das tarefas e gerenciamento de recurso inerentes ao problema. Estas restrições são apresentadas em 4.12 a 4.17.
+
+\begin{flalign}
+  &C_{rt} = C_{r0} + \sum_{i \in x} \sum^{t}_{\tau=1} x_{i(\tau-d_i)} P_{ir}, \forall t \in \{1, \dots, UB\}, \forall r \in R\\
+  &u_{rt} = u_{r0} + \sum_{i \in x} \sum^{t}_{\tau=1}
+  	\left(
+  		x_{i(\tau-d_i)} Cm_{ir} +
+  		x_{i\tau} Ct_{ir}
+  	\right), \forall t \in \{1, \dots, UB\}, \forall r \in R\\
+  &B_{rt} = \sum_{i \in x} \sum^{t}_{\tau=1}
+	\left(
+		x_{i\tau} - x_{i(\tau-d_i)}
+	\right)
+	\left(
+		Bo_{ir} + Cm_{ir}
+	\right),
+	\forall t \in \{1, \dots, UB\}, \forall r \in R\\
+  &U_{rt} \leq \sum_{s\in R}^{s \neq r} MU_{rs} U_{st}, \forall t \in \{1, \dots, UB\}, \forall r \in R\\
+  &max\{ U_{rt}, E_{sr}U_{st} | s \in R \} \geq \sum_{i \in x} x_{it}Pr_{ir}, \forall t \in \{1, \dots, UB\}, \forall r \in R\\
+  &U_{rt} - B_{rt} \geq \sum_{i \in x} x_{it} (Ct_{ir} + Cm_{ir} + Bo_{ir}), \forall t \in \{1, \dots, UB\}, \forall r \in R
+\end{flalign}
+
+Para estas restrições, temos que $x_{it}$ é uma variável binária que recebe valor 1 caso a tarefa $i$ inicie no tempo $t$. Sem perda de generalidade, podemos assumir que tarefas não-concluídas apresentadas no estado inicial $I_0$ estão representadas na solução $x$ e começam em um tempo $t < 0$. $C_{r0}, u_{r0}, B_{r0}$ representam o total coletado, o total consumido e o uso de um recurso $r$ no estado inicial $I_0$. Pelas equações 4.1 e 4.2, temos que:
+\begin{equation}
+U_{rt} = min\{C_{rt}, MC_r\} - u_{rt}
+\end{equation}
+A forma simplificada foi adotada para melhorar a legibilidade. 
+
+\vspace{.5cm}
+
+As restrições 4.12, 4.13 e 4.14 tratam da coleta e utilização de recursos ao longo do tempo, servindo para garantir que as quantidades dos atributos de cada recurso em um tempo $t$ estejam corretas de acordo com as tarefas que foram alocadas. A restrição 4.12 informa que a quantidade de recursos coletados brutos é igual à quantidade de recursos iniciais mais a produção de cada tarefa, que só acontece após um tempo $d_i$ do início. A restrição 4.13 mostra que o consumo de recursos é feito no início das tarefas para o custo ($Ct_{ir}$), e no fim delas para o consumo ($Cm_{ir}$). A quantidade de recursos travados da restrição 4.14 mostra que apenas são consideradas tarefas que não foram concluídas ainda e que possuem atributos de ``uso'' ou ``consumo''.
+
+A restrição 4.15 impõe os limites sobre o total utilizável de qualquer recurso $r$ em relação ao seu máximo por recurso, $MU_{rs}$. Esta é a generalização da restrição mostrada na restrição 4.3. A restrição 4.16 serve para garantir que os pré-requisitos de uma tarefa sejam cumpridos, e a restrição 4.17 mostra que deve haver recursos disponíveis para o custo, consumo e uso de uma tarefa no início de sua execução.
+
+
+\subsection{Exemplo}
+Para exemplificar um caso deste problema, será exposta uma versão simplificada da raça Zerg de \emph{StarCraft} como sistema para a estratégia que visa maximizar o estoque de minérios e garantir um \emph{spawning pool}\footnote{Estrutura Zerg que possibilita a criação de \emph{Zerglings}, a primeira unidade militar.}, a partir do estado inicial do jogo. Também serão mostrados exemplos de soluções com seus valores para cada função objetivo.
+
+A Tabela \ref{tab:recx} mostra os recursos do exemplo e seus atributos, onde minérios são utilizados como custo pela maioria das tarefas, gás vespeno é usado para evoluir uma \emph{hatchery} para uma \emph{lair} e os suprimentos são utilizados como custo para a criação de unidades. Suprimentos possuem um limite superior, ou seja, não se pode produzir mais que 200 unidades de suprimentos. O restante dos recursos possuem restrições que estão atreladas a outros recursos, e.g não pode haver mais larvas do que o triplo da quantidade de \emph{hatcheries} e \emph{lairs} juntas, ou mais drones que 18 vezes a quantidade de \emph{hatcheries} e \emph{lairs}. Extratores também não podem exceder a quantidade de \emph{hatcheries} e \emph{lairs}, nem pode haver mais do que três \emph{drones} coletores de gás em cada \emph{extractor}.
+
+Evoluir uma \emph{lair} a partir de uma \emph{hatchery} requer que se trave a unidade até que a evolução seja concluída. Neste momento, a \emph{hatchery} deixa de existir e a \emph{lair} é produzido. Além desta tarefa, algumas tarefas possuem atributos negativos (tabela \ref{tab:taskx}). A construção de estruturas requer o consumo de um \emph{drone}. Estas tarefas são \emph{Morph Hatchery}, \emph{Morph Sp. Pool} e \emph{Morph Extractor}. Quando este \emph{drone} é consumido, uma unidade de suprimento é liberada. Como há uma diferença entre quantidade máxima de suprimentos atual e a quantidade utilizada (produzido e consumido, respectivamente), deve haver uma redução na quantidade consumida, enquanto o produzido ainda permanece o mesmo.
+
+\begin{table}[t]
+\begin{center}
+	\caption[Recursos do exemplo de produção de recursos.]{Recursos do exemplo de produção de recursos. $MU$ denota o máximo utilizável, $MC$ o máximo coletável e $\equiv$ denota equivalência.}
+  \begin{tabular}{l|c|l}
+  Recurso & Símbolo & Atributos\\
+  \hline
+  Minérios & $m$ & \\
+  Gás Vespeno & $v$ & \\
+  Suprimentos & $s$ & $MC_s = 200$\\
+  Larva & $l$ & $MU_{lh} = 3, MU_{la} = 3$\\
+  \emph{Drone} & $d$ & $MU_{dh} = 18, MU_{da} = 18$\\
+  \emph{Drone} coletor de gás & $g$ & $MU_{ge} = 3$\\
+  \emph{Zergling} & $z$ & \\
+  \emph{Overlord} & $o$ & \\
+  \emph{Spawning Pool} & $p$ & \\
+  \emph{Hatchery} & $h$ & \\
+  \emph{Extractor} & $e$ & $MU_{eh} = 1, MU_{ea} = 1$\\
+  \emph{Lair} & $a$ & $a \equiv h$\\
+  \end{tabular}
+	\label{tab:recx}
+\end{center}
+\begin{center}
+	\caption{Tarefas do exemplo de produção de recursos.}
+  \begin{tabular}{l|c|c|c|c|c|c}
+  Tarefa & Tempo & Custo & Pré-R. & Cons. & Uso & Prod.\\
+  \hline
+  Morph Drone & 20 & 50 $m$, 1 $l$, 1 $s$ & & & & 1 $d$\\
+  Morph Drone (gás) & 2 & 1 $d$ &  && & 1 $g$\\
+  Morph Zergling & 28 & 50 $m$, 1 $l$, 1 $s$ & & & & 2 $z$\\
+  Morph Overlord & 40 & 100 $m$, 1 $l$ & & & & 1 $o$, 8 $s$\\
+  Morph Hatchery & 120 & 300 $m$, 1 $d$, -1 $s$ & & & & 1 $h$, 1 $l$, 1 $s$\\
+  Morph Sp. Pool & 80 & 200 $m$, 1 $d$, -1 $s$ & 1 $h$ & & & 1 $p$\\
+  Morph Extractor & 40 & 50 $m$, 1 $d$, -1 $s$ & & & & 1 $e$\\
+  Morph Lair & 100 & 150 $m$, 100 $v$ & & 1 $h$ & & 1 $a$, 1 $l$\\
+  Create Larva & 14 & & & & 1 $h$ & 1 $l$\\
+  Gather Minerals & 7 & & & & 1 $d$ & 8 $m$\\
+  Gather Gas & 5 & & & & 1 $g$ & 8 $v$\\
+  \end{tabular}
+	\label{tab:taskx}
+\end{center}
+\end{table}
+
+\begin{table}[h]
+\begin{center}
+	\caption{Estado inicial $I_0$ do exemplo de produção de recursos.}
+  \begin{tabular}{l|c|c|c|c|c|c|c|c|c|c|c|c}
+  & m & v & s & l & d & g & z & o & p & h & e & a\\
+  \hline
+  Coletado  & 50 & 0 & 9 & 1 & 4 & 0 & 0 & 1 & 0 & 1 & 0 & 0 \\
+  Consumido &  0 & 0 & 4 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 & 0 \\
+  \hline
+  \end{tabular}
+	\label{tab:statex}
+\end{center}
+\end{table}
+
+Dado este sistema, a estratégia que maximiza o estoque de minérios e garante um \emph{spawning pool} num tempo máximo de 300 segundos segue abaixo.
+\begin{align}
+  &\text{minimizar } min\left\{C_{max}, 300\right\}\\
+  &\text{maximizar } U_m
+\end{align}
+  sujeito a
+\begin{flalign}
+  & S_{max} \leq 300\\
+  & U_p > 1
+\end{flalign}
+
+O objetivo 4.19 é a minimização do tempo de conclusão das tarefas, tendo em vista o horizonte de 300 segundos. Objetivo 4.20 é a maximização da quantidade de minérios utilizáveis. A restrição 4.21 limita o tempo de inicialização da última tarefa pelo horizonte estabelecido, e a restrição 4.22 determina a quantidade mínima utilizável de \emph{spawning pools}.
+
+Duas soluções para o problema estão apresentadas na Figura \ref{fig:exem1}. As linhas azuis mostram o estoque de minérios ao longo do tempo, enquanto a linha magenta mostra o estoque de \emph{drones} ao longo do tempo. Retângulos azuis com listras diagonais esquerdas são as tarefas que consomem minérios, e possuem legendas apropriadas. Retângulos magenta com diagonais direitas são tarefas de coleta de recurso. As tarefas de coleta de recurso estão limitadas pelo estoque de \emph{drones}, por isso a altura de cada retângulo é igual à altura de uma unidade de \emph{drone} no estoque. Como estas tarefas apenas usam os \emph{drones}, não há redução no seu estoque em razão destas tarefas. Tarefas que consomem minérios possuem uma altura equivalente ao seu custo.
+
+A sequência de ações da solução \emph{4 pool} está representada em 4.23, enquanto a solução \emph{6 pool} é apresentada em 4.24. 
+\begin{align}
+  &\{\text{ 20x} \textit{ Gather Minerals}; \textit{ Morph Sp. Pool}; \text{ 36x} \textit{ Gather Minerals }\}\\
+  &\{\textit{ Morph Drone}; \text{ 8x} \textit{ Gather Minerals}; \textit{ Morph Drone}; \text{ 26x} \textit{ Gather Minerals};\\ \nonumber
+  & \textit{ Morph Sp. Pool}; \text{ 60x} \textit{ Gather Minerals }\}
+\end{align}
+
+Estas soluções mostram o impacto que \emph{drones} possuem na geração de recursos. Embora haja uma diferença de 15 segundos entre o tempo final das soluções, a solução que demora mais, \emph{6 pool}, possui quase o dobro de minérios que a outra solução: 462 minérios em contraste com 274 minérios da primeira solução.
+
+\begin{figure}[t]
+  \centering
+  \subfloat[\emph{4 pool}: 116 segundos, 274 minérios]{\includegraphics[scale=0.33]{Imagens/img1-1.png}}
+  \qquad
+  \subfloat[\emph{6 pool}: 131 segundos, 462 minérios]{\includegraphics[scale=0.33]{Imagens/img2-1.png}}
+  \caption[Soluções para a estratégia exemplo.]{Soluções para a estratégia exemplo. Os retângulos representam tarefas. Retângulos sem nome representam a tarefa \emph{Gather Minerals}.}
+  \label{fig:exem1}
+\end{figure}
+
+Tarefas de criação de larvas são repetidas a cada 14 segundos, por isto são omitidas na figura \ref{fig:exem1}. A solução \emph{4 pool} possui 56 tarefas de coleta de recursos, e a solução \emph{6 pool} possui 94 destas tarefas. Elas estão representadas na figura pelos blocos vermelhos sem nome, limitados pela quantidade de \emph{drones}.
+
+A progressão das tarefas de coleta de minérios se dá em função de um recurso, \emph{drones}, e do tempo. Isto não só apresenta um problema computacional para alocá-las, mas também um problema para interpretar o resultado final do otimizador. Tarefas repetidas acabam não perdendo real significado entre todas as tarefas de uma solução, pois no contexto de um jogo de estratégia em tempo real a coleta de recursos é tida como a atividade padrão de toda unidade que puder fazê-la, sendo a retirada de \emph{drones} da coleta uma ação mais significativa neste contexto. Além disso, elas são constantemente alocadas em todas as soluções ótimas da maior parte das estratégias em um RTS real, pois qualquer tarefa que possua um custo, consumo ou pré-requisito precisa de coleta de recursos que permita sua produção. Assim, dentre 57 tarefas totais na solução \emph{4 pool}, apenas uma possui real significado para a análise da solução, \emph{Morph Spawning Pool}.  Na solução \emph{6 pool}, são três tarefas significativas em meio a 97.
+
+Um outro aspecto da complexidade adicional destas tarefas repetidas aparece em cenários multiobjetivo. É possível, a partir de uma solução com a menor quantidade de tarefas repetidas, criar várias outras soluções apenas adicionando mais tarefas repetidas à solução original. Estas novas soluções não apresentam nenhuma informação significativa, servindo apenas para mostrar a projeção de produção de recursos num tempo futuro. Embora ainda esteja limitado ao tempo máximo, a adição de tarefas repetidas aumenta o espaço de busca consideravelmente para o otimizador.
+
+
+
+\section{Problema de Planejamento para Produção de Recursos com Eventos Cíclicos}
+Este problema é uma extensão do problema de planejamento para produção de recursos, e será o foco do restante do trabalho. Assim, ele é definido pelas mesmas três variáveis: o sistema \emph{S}, o estado inicial $I_0$ e a estratégia \emph{O}. Porém, o sistema possui um elemento adicional: o conjunto de eventos. O sistema $S=\langle R, T, E \rangle$ é uma 3-upla: (a) o conjunto de recursos \emph{R}, (b) o conjunto de tarefas \emph{T} e (c) o conjunto de eventos \emph{E}. Recursos e tarefas possuem as mesmas conotações que no problema anterior, já os eventos são ações periódicas que iniciam automaticamente ao criar um tipo de recurso, como por exemplo a coleta de recursos periódica iniciada ao produzir um trabalhador.
+
+O estado inicial $I_0$ deve incluir, além das informações dos recursos e das tarefas incompletas, informações sobre quais eventos estão ativos e seus tempos de início.
+
+As próximas seções irão expor o funcionamento dos eventos e seu impacto no modelo final do problema.
+
+
+\subsection{Eventos}
+Ao criar alguns recursos, pode-se ativar eventos cíclicos que produzem mais recursos, do mesmo tipo ou não. Eventos possuem os três atributos listados a seguir.
+\begin{itemize}
+\item \emph{Tempo de espera}: o período de cada ciclo do evento.
+\item \emph{Produção}: a quantidade de recursos produzidos a cada ciclo. Esta produção altera o $C_{rt}$ de cada recurso $r$ gerado após um tempo $\tau$ igual ao tempo de espera desde a criação do evento ou desde a última produção.
+\item \emph{Gatilho}: o recurso que, quando criado, gera um novo evento deste tipo.
+\end{itemize}
+
+Ao consumir uma unidade de um tipo de recurso que produza eventos, o evento que demorará mais para ser terminado também é destruído no processo, de forma que para qualquer evento $e \in E$, em qualquer tempo $t$, a seguinte restrição deve ser satisfeita:
+\begin{equation}
+  |V_{et}| = U_{rt}
+\end{equation}
+
+onde $V_{et}$ é o conjunto de todos os eventos do tipo $e$ ativos no tempo $t$. $U_{rt}$ é a quantidade utilizável do recurso $r$, tal que $r$ seja o gatilho do evento $e$. Isto se dá pela dependência que eventos cíclicos têm com seu gatilho. A coleta de recursos depende dos trabalhadores, e sem eles é impossível coletar recursos em jogos RTS. Da mesma forma, uma \emph{hatchery} de \emph{StarCraft} precisa estar viva para que haja produção de larva.
+
+\subsection{Modelo}
+O modelo do PPPREC permanece com as mesmas características do modelo anterior, PPPR. Porém, a adição de eventos altera a equação do total consumido. A equação corrigida é apresentada a seguir (equação 5.4), além das restrições referentes aos eventos. Utilizamos eventos como uma segunda variável de decisão ($x^e$), que é o conjunto de todos os eventos ativados pela solução $x$. O símbolo $e_{it}$ indica se o evento $i$ foi iniciado no tempo $t$, enquanto $\bar{e}_{it}$ denota o término do evento $i$ no tempo $t$.
+
+A equação 5.2 mostra o tempo real de início de um evento $i$ ($\hat\tau_i$), onde $LB$ é o menor tempo de início presente no estado inicial, seja de uma tarefa não-concluída ou de um evento. O tempo real é igual ao máximo entre dois valores, onde um é a busca pelo início do evento no intervalo $LB \leq \tau \leq 0$, e o outro valor é uma busca pelo início no intervalo $1 \leq \tau \leq UB$. Caso o início se dê antes do tempo $\tau > 0$, é preciso saber o primeiro tempo de ativação com $\tau > 0$. Como os valores são dependentes de $e_{i\tau}$, o valor de qualquer somatório será 0 ou um valor positivo que corresponde ao primeiro tempo de ativação.
+
+A produção de um recurso $r$ até o tempo $t$ a partir de eventos é dada pela equação 5.3. Nesta equação, a produção é o somatório das projeções de todas as produções de um recurso $r$ para cada evento $i$, desde o início do evento até tempo $t$, ou até o tempo de seu término, caso o evento acabe antes do tempo $t$.
+
+\begin{align}
+&\hat\tau_i = max\left\{ \sum^{0}_{\tau=LB} d^e_i \left\lceil\frac{-e_{i\tau}\tau}{d_i^e}\right\rceil +e_{i\tau}\tau, \sum^{UB}_{\tau=1}e_{i\tau}\tau \right\},\forall i \in x^e\\
+&P^e_{rt} = \sum_{i \in x^e} P^e_{ir}
+  \left[
+    %\sum^t_{\tau=\hat\tau_i}e_{i\tau} (t-\tau) -
+    \left(t - min\left\{t, \hat\tau_i\right\}\right) -
+    \sum^t_{\tau=1} \bar{e}_{i\tau} (t-\tau)
+  \right] \backslash d^e_i, \forall t \in \{1, \dots, UB\}, \forall r \in R
+\end{align}
+
+\begin{align}
+  &C_{rt} = C_{r0} +
+  \sum_{i \in x} \sum^{t}_{\tau=1} x_{i(\tau-d_i)} P_{ir} + P^e_{rt},\forall t \in \{1, \dots, UB\}, \forall r \in R\\
+  &\sum^t_{\tau=1} e_{i\tau} = min\{C_{g^e_i t}, MC_{g^e_i}\}, \forall t \in \{1, \dots, UB\}, \forall i \in x^e\\
+  &\sum^t_{\tau=1} \bar{e}_{i\tau} = u_{g^e_i t} + B_{g^e_it}, \forall t \in \{1, \dots, UB\}, \forall i \in x^e
+\end{align}
+
+A equação 5.4 adiciona a projeção da produção de todos os eventos, dada na equação 5.3, ao total coletado do recurso $r$ até o instante $t$. As equações 5.5 e 5.6 asseguram que a quantidade de eventos em cada instante $t$ é igual à quantidade utilizável do seu recurso-gatilho. Isto é feito de forma que o total de eventos criados seja igual ao total de recursos-gatilho coletados, e o total de eventos destruídos seja igual à soma do total de recursos consumidos com o total de recursos presos.
+
+
+\subsection{Exemplo}
+Como forma de comparação entre os dois modelos apresentados, abaixo segue o exemplo do seção anterior modificado para incluir eventos cíclicos.
+
+%\begin{table}[h]
+%\begin{center}
+% \begin{tabular}{l|c|l}
+% Recurso & Símbolo & Atributos\\
+% \hline
+% Minérios & $m$ & \\
+% Gás Vespeno & $v$ & \\
+% Suprimentos & $s$ & $MC_s = 200$\\
+% Larva & $l$ & $MU_{lh} = 3, MU_{la} = 3$\\
+% Drone & $d$ & $MU_{dh} = 18, MU_{da} = 18$\\
+% Drone coletor de gás & $g$ & $MU_{ge} = 3$\\
+% Zergling & $z$ & \\
+% Overlord & $o$ & \\
+% Spawning Pool & $p$ & \\
+% Hatchery & $h$ & \\
+% Extractor & $e$ & $MU_{eh} = 1, MU_{ea} = 1$\\
+% Lair & $a$ & $a \equiv h$\\
+% \end{tabular}
+  %\caption[Recursos do exemplo com eventos cíclicos.]{Recursos do exemplo com eventos cíclicos. $MU$ denota o máximo utilizável, $MC$ o máximo coletável e $\equiv$ denota equivalência.}
+% \label{tab:recy}
+%\end{center}
+%\end{table}
+
+\begin{table}[t]
+\begin{center}
+  \caption[Eventos do exemplo.]{Eventos do exemplo. A cada intervalo de tempo descrito é realizada a produção dos recursos. }
+  \begin{tabular}{l|c|c|c}
+  Evento & Tempo & Produção & Gatilho\\
+  \hline
+  Coletar minério & 7 & 8 minérios & $d$\\
+  Coletar gás vespeno & 5 & 8 gás vespeno & $g$\\
+  Produzir larva (Hatchery) & 14 & 1 larva & $h$\\
+  Produzir larva (Lair) & 14 & 1 larva & $a$\\
+  \end{tabular}
+  \label{tab:evey}
+\end{center}
+\begin{center}
+  \caption{Tarefas do exemplo com eventos cíclicos.}
+  \begin{tabular}{l|c|c|c|c|c}
+  Tarefa & Tempo & Custo & Pré-Req. & Consumo & Produção\\
+  \hline
+  Morph Drone & 20 & 50 $m$, 1 $l$, 1 $s$ & & & 1 $d$\\
+  Morph Drone (gás) & 2 & 1 $d$ & & & 1 $g$\\
+  Morph Zergling & 28 & 50 $m$, 1 $l$, 1 $s$ & & & 2 $z$\\
+  Morph Overlord & 40 & 100 $m$, 1 $l$ & & & 1 $o$, 8 $s$\\
+  Morph Hatchery & 120 & 300 $m$, 1 $d$, -1 $s$ & & & 1 $h$, 1 $l$, 1 $s$\\
+  Morph Spawning Pool & 80 & 200 $m$, 1 $d$, -1 $s$ & 1 $h$ & & 1 $p$\\
+  Morph Extractor & 40 & 50 $m$, 1 $d$, -1 $s$ & & & 1 $e$\\
+  Morph Lair & 100 & 150 $m$, 100 $v$ & & 1 $h$ & 1 $a$, 1 $l$
+  \end{tabular}
+  \label{tab:tasky}
+\end{center}
+\end{table}
+
+\begin{table}[h]
+\begin{center}
+  \caption{Estado inicial $I_0$ do exemplo com eventos cíclicos.}
+  \begin{tabular}{l|c|c|c|c|c|c|c|c|c|c|c|c}
+  & m & v & s & l & d & g & z & o & p & h & e & a\\
+  \hline
+  Coletado  & 50 & & 9 & 1 & 4 & & & 1 & & 1 & & \\
+  Consumido &    & & 4 &   &   & & &   & &   & & \\
+  \hline
+  \end{tabular}
+  \begin{tabular}{l|c}
+  Evento & Início\\
+  \hline
+  Coletar minério (1) & 0\\
+  Coletar minério (2) & 0\\
+  Coletar minério (3) & 0\\
+  Coletar minério (4) & 0\\
+  Produzir larva (Hatchery) & 0\\
+  \end{tabular}
+  \label{tab:statey}
+\end{center}
+\end{table}
+
+Os recursos permanecem inalterados (ver Tabela \ref{tab:recx}), mantendo as mesmas restrições de máximo coletável, máximos utilizáveis e equivalência que o exemplo original. Porém com a adição de eventos (Tabela \ref{tab:evey}) a quantidade de tarefas (Tabela \ref{tab:tasky}) diminuiu. A antiga tarefa de criação de larva usava uma \emph{hatchery}, de forma que era impossível criar um \emph{lair} e produzir larva ao mesmo tempo. Caso o sistema fosse completo, também não seria possível pesquisar tecnologias na mesma \emph{hatchery} que estivesse produzindo larvas. Ao transformar em evento, ambas situações se tornam possíveis.
+
+Em compensação, o estado inicial (Tabela \ref{tab:statey}) agora possui mais informações que apenas o estado dos recursos e tarefas. Enquanto o tamanho de informações sobre recursos varia de acordo com a quantidade de recursos do sistema, o tamanho de informações sobre eventos varia de acordo com a quantidade utilizável de cada gatilho no estado inicial.
+
+A estratégia de otimização permanece idêntica, maximizando a quantidade utilizável de minérios e garantindo um \emph{spawning pool} num tempo máximo de 300 segundos (ver objetivos e restrições 4.19 a 4.22).
+
+As soluções para a mesma estratégia produzem os mesmos resultados (ver Figura \ref{fig:exem2}). Isto mostra que esta extensão do modelo básico não altera o comportamento do problema, uma vez que não houve redução de termos mas adição de termos. Para decidir quais eventos são excluídos no consumo de recursos-gatilhos, a técnica utilizada foi excluir o evento que levará o maior tempo para voltar a se ativar.
+
+\begin{figure}
+  \centering
+  \subfloat[\emph{4 pool}: 116 segundos, 274 minérios]{\includegraphics[scale=0.33]{Imagens/img1-2.png}}
+  \qquad
+  \subfloat[\emph{6 pool}: 131 segundos, 462 minérios]{\includegraphics[scale=0.33]{Imagens/img2-2.png}}
+  \caption[Soluções para a estratégia exemplo.]{Soluções para a estratégia exemplo. Retângulos cinza representam tarefas que produzem unidades ou estruturas, e o recurso produzido está descrito dentro de cada retângulo.}
+  \label{fig:exem2}
+\end{figure}
+
+Uma vez que são utilizados eventos ao invés de tarefas repetitivas, a quantidade de informações que o otimizador tem que trabalhar cai drasticamente. Não é mais possível estender uma solução mínima para vários períodos de tempo distintos, produzindo apenas diferentes projeções de produção. 

@@ -1,0 +1,217 @@
+% Apêndice
+\apendice
+\chapter{Descrição do jogo StarCraft}
+
+
+\begin{figure}
+  \centering
+  \includegraphics[scale=0.35]{Imagens/Base.jpg}
+  \caption{Base inicial em StarCraft após poucos minutos de jogo.}
+  \label{fig:base}
+\end{figure}
+
+Todo jogo de StarCraft tradicionalmente começa com uma base inicial e quatro trabalhadores situados numa região com alta quantidade de minérios e pelo menos um gêiser de gás vespeno, como mostrado na Figura \ref{fig:base}. No canto superior direito, estão expostos os recursos com os quais o jogador trabalha: minérios, gás vespeno e suprimentos (ver Figura \ref{fig:topcorn}). Suprimentos possuem a quantidade utilizada e a quantidade total expostas lado a lado, o primeiro no lado esquerdo e o segundo no lado direito. Minérios e gás vespeno podem ser considerados recursos naturais, pois eles estão presentes no mapa (campo de batalha) para serem coletados, enquanto suprimentos são construídos com estruturas especializadas utilizando esses recursos naturais.
+
+\begin{figure}
+  \centering
+  \includegraphics[scale=1]{Imagens/resources.png}
+  \caption{Recursos na interface gráfica de StarCraft.}
+  \label{fig:topcorn}
+\end{figure}
+
+Desses recursos naturais, os minérios são os principais, usados para produção de todas as unidades, estruturas e pesquisas dentro do jogo. O gás vespeno, por sua vez, é usado para unidades especiais e pesquisas tecnológicas. Para aquisição desses recursos são necessários trabalhadores, que se encarregarão de coletar os recursos a partir de alguma fonte e entregá-los à base mais próxima.
+
+Além de recursos naturais, o jogador precisa de \emph{suprimentos}, sem os quais não é possível produzir unidades. Cada unidade consome uma quantidade pré-determinada de suprimentos, e para poder produzir mais unidades é necessária a criação de mais fontes de suprimento, até que se chegue à capacidade máxima determinada pelo jogo. Um recurso que pode ser considerado secundário é o \emph{tempo}, uma vez que toda produção e movimentação está restrita ao tempo de conclusão.
+
+A criação de unidades, incluindo trabalhadores, é feita em estruturas de produção. Essas estruturas podem ter pré-requisitos estruturais, isto é, o jogador pode necessitar de uma ou mais estruturas já construídas para que possa construir uma determinada estrutura. Unidades também podem ter esses pré-requisitos, isto é, o jogador pode precisar de outra estrutura além da estrutura produtora para produzir um determinado tipo de unidade. As estruturas de produção possuem uma fila de produção com a qual pode-se antecipar a ordem de construção de alguma unidade, isto é, sem precisar futuramente mandar a estrutura produzir no tempo exato de término da última tarefa. Isso ajuda o jogador a otimizar o tempo em algumas situações, como quando ele quer produzir muitas unidades.
+
+Unidades possuem tipos, tamanhos e visibilidades. Os tipos possíveis são: (a) mecânico, (b) robótico e (c) biológico. Unidades mecânicas possuem componentes mecânicos, normalmente sendo algum tipo de veículo. Unidades robóticas são controladas por alguma inteligência artificial e por isso são imunes a certas habilidades que atigem unidades mecânicas. Unidades biológicas são compostas primariamente de componentes não-mecânicos, como as unidades que representam seres de cada uma das raças. Unidades também possuem tamanhos: (a) pequeno, (b) médio e (c) grande. O tamanho das unidades é levemente relacionado ao seu tamanho real, sendo mais próximo da qualidade da armadura que ela usa. Unidades também podem ser camufladas ou detectoras. Unidades camufladas fazem o jogador inimigo precisar de uma estrutura ou unidade \emph{detectora} para revelá-las para o jogador. Apenas uma unidade é tanto detectora como camuflada: o \emph{observer} dos Protoss. Além disso, unidades podem ser voadoras ou terrestres. Unidades voadoras não possuem restrição de movimento, enquanto as terrestres estão restritas ao terreno do mapa.
+
+Unidades e estruturas podem possuir energia. Este recurso é usado para ativar certas habilidades, e o estoque de cada unidade/estrutura aumenta com o tempo até um limite máximo pré-determinado. Em alguns casos, é possível aumentar o limite máximo de energia de algumas unidades com a pesquisa de tecnologias relacionadas.
+
+Antes de cada partida, o jogador deve escolher uma entre três raças, cada uma com suas próprias árvores tecnológicas e peculiaridades. A seguir, cada uma das raças será descrita, com sua árvore tecnológica.
+
+\section{Protoss}
+Protoss são uma raça de alienígenas tecnologicamente bem desenvolvidos, e com uma sociedade de castas rígida. Os poderes e ataques de suas unidades misturam conceitos de alta tecnologia e magia. As estruturas desta raça necessitam estar localizadas dentro de uma ``matriz psiônica'', uma área elíptica ao redor de uma estrutura fornecedora de energia (ver Figura \ref{fig:psimatrix}). Estruturas também são construídas automaticamente, isto é, trabalhadores são necessários apenas para iniciar o processo de construção, podendo voltar à coleta de recursos depois. Além disso, Protoss são a única raça que possui escudos de energia. Todas as suas estruturas e unidades possuem algum tipo de proteção de escudo além dos pontos de vida comuns. Estes pontos de escudo regeneram, enquanto os pontos de vida não. Esta raça também não possui nenhum meio de conserto de unidades mecânicas ou robóticas.
+
+\begin{figure}
+  \centering
+  \includegraphics[scale=0.6]{Imagens/psimatrix.PNG}
+  \caption{Matriz psiônica dos Protoss.}
+  \label{fig:psimatrix}
+\end{figure}
+
+\begin{figure}
+  \centering
+  \includegraphics[scale=0.7]{Imagens/protoss/protoss.png}
+  \caption[Árvore tecnológica dos Protoss.]{Árvore tecnológica dos Protoss. Estruturas estão representadas dentro de retângulos e unidades aparecem em cima de círculos. Unidades estão ligadas às estruturas que as produzem por linhas azuis, enquanto dependências são representadas por setas vermelhas que saem da dependência para o dependente.}
+  \label{fig:ptech}
+\end{figure}
+
+\subsection{Estruturas}
+\begin{itemize}
+	\item \emph{Nexus}: estrutura-base que produz os trabalhadores. Ela não necessita de uma matriz psiônica para funcionar.
+	\item \emph{Pylon}: estrutura fornecedora de suprimento, que também serve de gerador de energia para as outras estruturas.
+	\item \emph{Assimilator}: estrutura que permite a coleta de gás vespeno dos gêiseres. Ela não necessita de matriz psiônica.
+	\item \emph{Forge}: estrutura de pesquisa para melhoramentos de ataque e defesa das unidades terrestres.
+	\item \emph{Photon Cannon}: estrutura de defesa detectora, capaz de atirar em unidades terrestres e aéreas.
+	\item \emph{Gateway}: estrutura de produção de unidades biológicas terrestres.
+	\item \emph{Shield Battery}: estrutura que regenera escudos de unidades próximas ao custo de energia.
+	\item \emph{Cybernetics Core}: estrutura de pesquisa para melhoramentos de ataque e defesa das unidades voadoras.
+	\item \emph{Robotics Facility}: estrutura de produção de unidades robóticas.
+	\item \emph{Robotics Support Bay}: estrutura de pesquisa de tecnologias para unidades robóticas.
+	\item \emph{Observatory}: estrutura de habilitação e pesquisa de tecnologias relacionadas ao \emph{observer}.
+	\item \emph{Stargate}: estrutura de produção de unidades aéreas.
+	\item \emph{Fleet Beacon}: estrutura de habilitação e pesquisa de tecnologias relacionadas ao \emph{carrier}.
+	\item \emph{Citadel of Adun}: estrutura de pesquisa de tecnologias relacionadas ao \emph{zealot}.
+	\item \emph{Templar Archives}: estrutura de habilitação e pesquisa de tecnologias relacionadas a \emph{high templar} e \emph{dark archon}.
+	\item \emph{Arbiter's Tribunal}: estrutura de habilitação e pesquisa de tecnologias relacionadas ao \emph{arbiter}.
+\end{itemize}
+
+\subsection{Unidades}
+\begin{itemize}
+	\item \emph{Probe}: unidade trabalhadora, capaz de coletar recursos e iniciar construções.
+	\item \emph{Zealot}: unidade biológica pequena corpo-a-corpo. Primeira unidade militar da raça.
+	\item \emph{Dragoon}: unidade mecânica grande de ataques à distância.
+	\item \emph{High Templar}: unidade biológica pequena. Possui habilidades ao invés de ataques, e uma grande quantidade de energia. Sua principal habilidade é \emph{psionic storm}, que causa grande quantidade de dano em área.
+	\item \emph{Dark Templar}: unidade biológica pequena corpo-a-corpo camuflada. Possui um ataque de alto dano, sendo capaz de destruir trabalhadores em um único golpe. Isto pode ser potencialmente perigoso, pois o jogo não avisa quando uma unidade morre após um único golpe.
+	\item \emph{Archon}: unidade grande de ataques à distância, sem nenhum outro tipo. Feito da combinação de dois \emph{high templar}, é uma unidade que possui quantidade ínfima de pontos de vida, mas um dos maiores escudos da raça. Seu alcance é reduzido. comparado a outras unidades de ataque à distância, mas causa grande dano em área a cada golpe.
+	\item \emph{Dark Archon}: unidade grande, sem nenhum outro tipo. Feito da combinação de dois \emph{dark templar}, essa unidade não possui nenhum ataque, sendo um conjurador como o \emph{high templar}. Sua habilidade característica é \emph{feedback}, que exaure o estoque de energia de uma unidade e causa a mesma quantidade em dano seus pontos de vida. Tal qual o \emph{archon}, ela possui uma grande quantidade de escudos e poucos pontos de vida.
+	\item \emph{Shuttle}: unidade robótica aérea grande. O \emph{shuttle} serve de transportadora para a raça. Possui oito vagas para transporte, como todos os transportadores, mas cada unidade exige uma quantidade de vagas diferente. É possível aumentar a velocidade do transporte com uma tecnologia especializada.
+	\item \emph{Reaver}: unidade robótica terrestre de ataques à distância. Os ataques devastadores e em área do \emph{reaver} possuem um custo bem definido. Cada unidade é capaz de armazenar cinco tiros, porém ela é criada sem nenhum tiro. Cada tiro custa 25 minérios e tempo para ser feito. É possível aumentar o dano e a quantidade de tiros armazenada por unidade com tecnologias.
+	\item \emph{Observer}: unidade robótica aérea detectora camuflada pequena. Não possui ataques, apenas uma grande área de visão.
+	\item \emph{Scout}: unidade mecânica aérea grande de ataques à distância. Consegue atirar em unidades terrestres e aéreas com dois ataques distintos.
+	\item \emph{Corsair}: unidade mecânica aérea de ataques à distância. Consegue atacar apenas outras unidades aéreas. Possui uma habilidade que desabilita o ataque à distância de unidades que estiverem em uma determinada área.
+	\item \emph{Carrier}: unidade mecânica aérea grande de ataques à distância. Como o \emph{reaver}, esta unidade não consegue atacar por si só, ela precisa produzir \emph{interceptors}. Estas são unidades que atacam pelo \emph{carrier}. Elas são produzidar ao custo de 25 minérios e o \emph{carrier} pode acomodar quatro ao mesmo tempo. A capacidade pode ser aumentada com tecnologia especilizada.
+	\item \emph{Arbiter}: unidade mecânica aérea grande de ataques à distância. Apesar de ser capaz de atacar, seu dano e cadência de tiro são baixos. A unidade compensa com habilidades. A primeira habilidade, \emph{cloaking field}, camufla todas as unidades ao redor do \emph{arbiter}. \emph{Recall} teleporta unidades em uma área pequena para debaixo do \emph{arbiter}. \emph{Stasis field} desabilita unidades em uma área, impedindo elas de moverem ou atacarem, mas também impedindo de serem atacadas ou serem alvos de habilidades.
+\end{itemize}
+
+\section{Terran}
+Os humanos, ou Terran, possuem a maior versatilidade na composição de suas tropas. Tropas biológicas podem ser regeneradas com a unidade médica, e tropas mecânicas podem ser consertadas pelos trabalhadores. Os trabalhadores também precisam construir as estruturas até o final, ao contrário dos Protoss, sem poder superar o limite de um trabalhador por estrutura. Por ter esta limitação, os Terran podem construir livremente pelo mapa. Algumas estruturas podem possuir \emph{add-ons}, que são utilizados para aprimorar suas capacidades. Estes \emph{add-ons} podem servir de estruturas de pesquisa ou para possibilitar uso de habilidades.
+
+\begin{figure}
+  \centering
+  \includegraphics[scale=0.75]{Imagens/terran/terran.png}
+  \caption[Árvore tecnológica dos Terran.]{Árvore tecnológica dos Terran. Estruturas estão representadas dentro de retângulos sobre o terreno e unidades aparecem em quadrados negros. Unidades estão ligadas às estruturas que as produzem por linhas azuis, \emph{add-ons} estão ligados às estruturas que as produzem por linhas verdes, enquanto dependências são representadas por setas vermelhas que saem da dependência para o dependente.}
+  \label{fig:ttech}
+\end{figure}
+
+\subsection{Estruturas}
+\begin{itemize}
+	\item \emph{Command Center}: estrutura-base que produz os trabalhadores.
+	\item \emph{Supply Depot}: estrutura fornecedora de suprimento.
+	\item \emph{Refinery}: estrutura que permite coleta de gás vespeno.
+	\item \emph{Engineering Bay}: estrutura de pesquisa para melhoramento de ataque e defesa de unidades biológicas.
+	\item \emph{Missile Turret}: estrutura de defesa contra unidades aéreas.
+	\item \emph{Barracks}: estrutura de produção de unidades biológicas terrestres.
+	\item \emph{Bunker}: estrutura de defesa que não ataca sozinha. Ela possui espaço para unidades biológicas terrestres, e seu poder de fogo depende das unidades que estão abrigadas.
+	\item \emph{Academy}: estrutura de pesquisa de melhoramentos e habilidades para unidades biológicas terrestres.
+	\item \emph{ComSat Station}: \emph{add-on} do \emph{command center} que permite escanear uma área no mapa, revelando unidades e estruturas mesmo camufladas.
+	\item \emph{Factory}: estrutura de produção de unidades mecânicas terrestres.
+	\item \emph{Machine Shop}: \emph{add-on} da \emph{factory} que permite produção de unidades mais avançadas, além de ser uma estrutura de pesquisa para as unidades mecânicas terrestres.
+	\item \emph{Armory}: estrutura de pesquisa de melhoramentos de ataque e defesa das unidades mecânicas, aéreas e terrestres.
+	\item \emph{Starport}: estrutura de produção de unidades mecânicas voadoras.
+	\item \emph{Control Tower}: \emph{add-on} do \emph{starport} que permite produção de unidades mais avançadas, além de fornecer pesquisa para unidades mecânicas voadoras.
+	\item \emph{Science Facility}: estrutura de pesquisa para a unidade \emph{science vessel}.
+	\item \emph{Physics Lab}: \emph{add-on} da \emph{science facility} que permite a produção de \emph{battlecruisers}, além de fornecer pesquisa para estas unidades.
+	\item \emph{Covert Ops}:  \emph{add-on} da \emph{science facility} que permite a produção de \emph{ghosts}, além de fornecer pesquisa para estas unidades.
+	\item \emph{Nuclear Silo}:  \emph{add-on} da \emph{command center} que permite o uso da habilidade \emph{nuclear strike}, da unidade \emph{ghost}.
+\end{itemize}
+
+\subsection{Unidades}
+\begin{itemize}
+	\item \emph{SCV}: unidade trabalhadora, capaz de coletar recursos e construir estruturas.
+	\item \emph{Marine}: unidade biológica pequena de ataque à distância. Possui melhoramento, \emph{stimpack}, que aumenta seu poder de fogo por um curto tempo ao custo de seus pontos de vida.
+	\item \emph{Firebat}: unidade biológica pequena corpo-a-corpo. Seu ataque é em área e efetivo contra unidades pequenas. Ataca apenas unidades terrestres. Também é possui a habilidade \emph{stimpack}.
+	\item \emph{Medic}: unidade biológica pequena. Não possui ataques, mas regenera vida de uma unidade próxima por vez, ao custo de energia.
+	\item \emph{Ghost}: unidade biológica pequena. Possui várias habilidades como \emph{nuclear strike}, além de poder ficar camuflada ao custo de energia.
+	\item \emph{Vulture}: unidade mecânica de ataque à distância. Possui um melhoramento que a torna a unidade mais rápida da raça, e outro que a permite plantar minas de proximidade pelo mapa.
+	\item \emph{Siege Tank}: unidade mecânica grande de ataque à distância. Ataca apenas unidades terrestres. Possui dois modos de ataque. No modo normal, a unidade possui uma cadência de tiros média e atinge um alvo por vez. No modo de cerco, a cadência de tiros é bem inferior, mas causa uma grande quantidade de dano em uma pequena área à uma distância enorme. Este modo torna a unidade imóvel.
+	\item \emph{Goliath}: unidade mecânica grande de ataque à distância. Possui um grande dano contra unidades aéreas, e seu alcance anti-aéreo pode ser aumentado para um dos maiores alcances do jogo.
+	\item \emph{Dropship}: unidade mecânica aérea grande de transporte.
+	\item \emph{Wraith}: unidade mecânica aérea grande de ataque à distância. Possui melhoramento para camuflagem ao custo de energia.
+	\item \emph{Valkyrie}: unidade mecânica aérea grande de ataque à distância. Ataca apenas unidades aéreas. Seus ataques são em área.
+	\item \emph{Science Vessel}: unidade mecânica aérea grande detectora. Não possui ataques. Suas habilidades ofensivas são voltadas a cada uma das outras raças. \emph{EMP shockwave} elimina os escudos de todas as unidades em uma grande área, e \emph{irradiate} causa dano ao longo do tempo em unidades biológicas em volta da unidade atingida.
+	\item \emph{Battlecruiser}: unidade mecânica aérea grande de ataques à distância. Possui a habilidade \emph{yamato cannon}, que causa grande dano em um único alvo ao custo de energia.
+\end{itemize}
+
+\section{Zerg}
+Os Zerg são criaturas que possuem uma mentalidade de enxame, controlada por um cérebro central -- Overmind. Como os Protoss, as estruturas Zerg precisam de uma ``fonte de energia''. Ao invés de algo invisível, os Zerg alteram o terreno com a \emph{creep}, ou gosma (ver Figura \ref{fig:creep}). A gosma é espalhada ao redor das estruturas-base e de estruturas especializadas: \emph{creep colony}. Apenas Zerg conseguem construir num terreno contaminado pela gosma. Para construir estruturas, um trabalhador é consumido, ao invés de serem construídas de maneira separada dos trabalhadores. Ao contrário das outras raças, as unidades Zerg não são feitas em estruturas especializadas, mas pela estrutura-base. Esta estrutura produz de maneira cíclica larvas, unidades que são utilizadas para produção das outras unidades Zerg. Também não há estrutura que forneça grandes quantidades de suprimentos, mas uma unidade, \emph{overlord}. Estruturas-base fornecem apenas um suprimento, enquanto overlords fornecem 8. As unidades Zerg possuem uma taxa de regeneração de vida, ao contrário das unidades das outras raças. Porém não possuem nenhuma maneira de regeneração ativa de pontos de vida.
+
+\begin{figure}
+  \centering
+  \includegraphics[scale=0.6]{Imagens/creep.png}
+  \caption{Gosma dos Zerg.}
+  \label{fig:creep}
+\end{figure}
+
+
+\begin{figure}
+  \centering
+  \includegraphics[scale=0.75]{Imagens/zerg/zerg.png}
+  \caption[Árvore tecnológica dos Zerg.]{Árvore tecnológica dos Zerg. Estruturas estão representadas dentro de retângulos sobre o terreno e unidades aparecem em quadrados negros. Unidades estão ligadas às estruturas que as produzem por linhas azuis, evoluções estão ligadas às estruturas originais por linhas verdes, enquanto dependências são representadas por setas vermelhas que saem da dependência para o dependente.}
+  \label{fig:ttech}
+\end{figure}
+
+\subsection{Estruturas}
+\begin{itemize}
+	\item \emph{Hatchery}: estrutura-base que produz larvas. Não precisa de \emph{creep} para ser construída, mas espalha \emph{creep}.
+	\item \emph{Extractor}: estrutura que permite coleta de gás vespeno. Não precisa de \emph{creep} para ser construída.
+	\item \emph{Creep Colony}: estrutura que espalha \emph{creep} no mapa.
+	\item \emph{Sunken Colony}: evolução da \emph{creep colony}, estrutura de defesa contra unidades terrestres.
+	\item \emph{Spore Colony}: evolução da \emph{creep colony}, estrutura detectora e de defesa contra unidades aéreas.
+	\item \emph{Evolution Chamber}: estrutura de pesquisa para melhoramentos de ataque e defesa das unidades terrestres.
+	\item \emph{Spawning Pool}: estrutura de habilitação e pesquisa relacionada ao \emph{zergling}.
+	\item \emph{Hydralisk Den}: estrutura de habilitação e pesquisa relacionada ao \emph{hydralisk} e \emph{lurker}.
+	\item \emph{Lair}: evolução da \emph{hatchery}. Possui mais pontos de vida e habilita novas estruturas.
+	\item \emph{Spire}: estrutura de habilitação de unidades aéreas de ataque, além de servir de estrutura de pesquisa de ataque e defesa para unidades aéreas.
+	\item \emph{Queen's Nest}: estrutura de habilitação e pesquisa relacionada à \emph{queen}.
+	\item \emph{Hive}: última evolução da \emph{hatchery}. Possui ainda mais pontos de vida do que a \emph{lair} e habilita o último nível de estruturas.
+	\item \emph{Nydus Canal}: estrutura que serve de ponte para as unidades. São necessárias duas estruturas interconectadas para que a ponte seja utilizável.
+	\item \emph{Ultralisk Den}: estrutura de habilitação e pesquisa relacionada ao \emph{ultralisk}.
+	\item \emph{Greater Spire}: evolução da \emph{spire}, habilita o uso de \emph{guardians} e \emph{devourers}.
+	\item \emph{Defiler Mound}: estrutura de habilitação e pesquisa relacionada ao \emph{defiler}.
+\end{itemize}
+
+\subsection{Unidades}
+\begin{itemize}
+	\item \emph{Larva}: unidade que serve de ponto de partida para produção de todas as outras unidades.
+	\item \emph{Drone}: unidade trabalhadora, capaz de coletar recursos e se sacrificar para dar início às estruturas.
+	\item \emph{Overlord}: unidade detectora aérea grande. É a unidade que fornece suprimentos para a raça. Embora a \emph{hatchery} forneça também, o overlord fornece 8 suprimentos em contraste com o único suprimento oferecido pela estrutura. Pode servir de transporte, caso uma tecnologia seja pesquisada.
+	\item \emph{Zergling}: unidade pequena corpo-a-corpo. Primeira unidade militar da raça. Uma larva produz um par de \emph{zerglings}. Possui um \emph{upgrade} de movimentação que a torna uma das unidades mais rápidas do jogo.
+	\item \emph{Hydralisk}: unidade de ataque à distância. Pode evoluir para o lurker, caso o jogador tenha feito a pesquisa necessária.
+	\item \emph{Lurker}: unidade grande de ataque à distância. Não possui ataques normalmente, precisando se enterrar para atacar. Ao ficar enterrado, o \emph{lurker} fica camuflado, forçando o inimigo a produzir um detector.
+	\item \emph{Mutalisk}: unidade pequena aérea de ataque à distância. Possui grande mobilidade, e seus ataques ricocheteam em até outras duas unidades, um terço do dano anterior em cada alvo adicional.
+	\item \emph{Scourge}: unidade pequena aérea corpo-a-corpo. Essa unidade é destruída no contato com outras unidades aéreas, causando enorme dano no alvo. Como o zergling, essa unidade é produzida aos pares.
+	\item \emph{Queen}: unidade aérea. Essa unidade não possui ataques, mas habilidades. Sua habilidade principal é \emph{spawn broodling}, que atinge unidades terrestres biológicas ou mecânicas. A unidade é instantaneamente destruída e duas unidades, \emph{broodlings}, nascem no lugar. Elas são unidades pequenas corpo-a-corpo e possuem tempo de vida limitado.
+	\item \emph{Ultralisk}: unidade grande corpo-a-corpo. Ao contrário das outras unidades da raça, \emph{ultralisks} custam caro e possuem muitos pontos de vida e armadura. Esta armadura pode ser melhorada além do limite normal através de pesquisas especializadas.
+	\item \emph{Guardian}: unidade grande aérea de ataques à distância. Evolução da \emph{mutalisk} que consegue atirar apenas em unidades e estruturas terrestres. Possui um alcance muito alto, sendo usada como unidade de cerco semelhante às artilharias num exército moderno.
+	\item \emph{Devourer}: unidade grande aérea de ataques à distância. Outra evolução da \emph{mutalisk}, mas ao contrário do \emph{guardian}, ela só consegue atirar em outras unidades aéreas. Seu ataque é em área e causa um efeito corrosivo que intensifica o dano de outros ataques à mesma unidade. Este efeito possui um limite máximo de esporos numa mesma unidade.
+	\item \emph{Defiler}: unidade terrestre sem outros tipos. Não possui ataques, mas habilidades. Duas habilidades são chave para a unidade. A primeira é \emph{dark swarm}, que impede o dano de ataques à distância em uma grande área no campo de batalha. A segunda é \emph{plague}, que atinge todas as unidades numa área e causa dano contínuo até que a unidade fique com apenas um único ponto de vida ou receba 295 pontos de dano.
+\end{itemize}
+
+
+%\begin{itemize}
+%  \item \emph{Protoss}: é uma raça que possui unidades muito resistentes e com elevado poder de fogo, porém consomem muito de todos os recursos - minérios, gás, suprimento e tempo - para serem produzidas. Suas estruturas de produção são especializadas: \emph{gateway} é encarregado de produzir as unidades terrestres básicas de ataque, a \emph{robotics facility} produz unidades utilitárias, isto é, unidades que precisam de unidades básicas para que seu uso no exército tenha sentido, e o \emph{stargate} produz unidades aéreas de ataque. Sua estrutura-base é o \emph{nexus}.
+%  \item \emph{Zerg}: voltada a produzir muitas unidades de uma só vez, esta raça possui as unidades mais frágeis e mais baratas do jogo. Ao contrário das outras raças, ela possui apenas uma estrutura de produção, que também é sua estrutura-base, a \emph{hatchery}. A \emph{hatchery} gera larvas, unidades especiais que servem apenas para produzir outras unidades, e não possui fila de produção, de forma que é possível produzir várias unidades ao mesmo tempo.
+%  \item \emph{Terran}: é uma raça parecida com os Protoss, porém mais versátil. Um meio termo entre Protoss e Zerg, já que possui unidades baratas e frágeis, mas com sua produção limitada a estruturas de produção semelhantes às dos Protoss. Os Terran possuem dois tipos de estratégias consolidados, um baseado nas unidades feitas nas \emph{barracks} e outro baseado nas unidades feitas na \emph{factory}. As estratégias baseadas em \emph{barracks} se chamam \emph{Bio Terran} ou somente \emph{Bio}, e as baseadas em \emph{factory} se chamam \emph{Mech Terran} ou somente \emph{Mech}.
+%\end{itemize}
+
+\chapter{Hipervolume}
+
+O indicador de hipervolume (também chamado de métrica-S ou medida de Lebesgue) é um dos indicadores de qualidade para problemas multiobjetivo. Estes problemas possuem dois critérios informais de qualidade: (a) a proximidade dos pontos de uma fronteira de aproximação em relação à fronteira de Pareto e (b) o quão distribuídos estão os pontos da fronteira de aproximação ao longo da fronteira de Pareto. O indicador de hipervolume é tido como uma métrica justa, uma vez que respeita estes critérios informais além de possuir propriedades teóricas favoráveis.
+
+Sem perda de generalidade, podemos considerar que problemas multiobjetivo procuram maximizar $d$ funções objetivo. Então, o indicador de hipervolume pode ser definido formalmente da seguinte forma: dado um conjunto finito $P$ de pontos em um ortante positivo $\mathbb{R}^d_{\geq0}$, o indicador de hipervolume é definido como o volume $d$-dimensional do polítopo ortogonal sem buracos $\Pi^d$ correspondente ao espaço dominado por pelo menos um ponto do conjunto $P$, dado pela equação \ref{eq:poli}. A Figura \ref{fig:hvex} mostra graficamente o hipervolume de um problema biobjetivo.
+\begin{equation}
+	\label{eq:poli}
+	\Pi^d = \left\{ x \in \mathbb{R}^d_{\geq0} : x \preceq p \text{ para algum } p \in P \right\}
+\end{equation}
+
+\begin{figure}[h]
+  \centering
+  \includegraphics[scale=0.45]{Imagens/hv-example.png}
+  \caption{Hipervolume de um conjunto de pontos num espaço bidimensional.}
+  \label{fig:hvex}
+\end{figure}
+
+O hipervolume dominado é calculado em relação a um ponto de referência $r$ que, na definição acima, é escolhido para coincidir com a origem. A definição também presume maximizar todos os objetivos e valores objetivos estritamente positivos. Sempre que não for o caso, transformações afins adequadas podem ser aplicadas para cada objetivo separadamente.

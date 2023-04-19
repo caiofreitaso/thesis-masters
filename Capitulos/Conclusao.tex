@@ -1,0 +1,20 @@
+\chapter{Conclusão}
+
+Este trabalho mostrou um novo problema de otimização multiobjetivo, motivado por jogos de estratégia em tempo real. Este novo modelo visa preencher a lacuna deixada por modelos anteriores, que não conseguem capturar certos aspectos envolvidos nos recursos de RTS. O modelo possui três variáveis, o sistema, o estado inicial e a estratégia. Um conjunto de otimizadores foi selecionado para verificar a factibilidade do modelo, e a viabilidade do modelo em ambientes reais.
+
+O modelo se mostrou factível, uma vez que quatro otimizadores foram criados com sucesso para resolver o modelo. A viabilidade do modelo, no entanto, depende do tipo de otimizador que é considerado. O algoritmo ``Knee'', modificação do NSGA-II que busca ``joelhos'', não apresenta melhoras estatísticas no desempenho para a maioria dos casos, e ainda possui um tempo de processamento muito alto para determinados casos. Algoritmos com busca local produziram resultados por vezes melhor, mas com um tempo previsivelmente superior aos algoritmos genéticos. O algoritmo que conseguiu se manter de forma consistente em boas colocações tanto no desempenho dos hipervolumes quanto no tempo de execução foi o NSGA-II, que ficou com o melhor tempo de execução e o segundo melhor desempenho em hipervolumes. 
+
+O NSGA-II utilizado possui apenas o operador de mutação que é aplicado à toda a população, sem chance de falha. Este algoritmo, bem mais simples que os algoritmos de busca local, conseguiu, em um mesmo número de iterações, obter melhores resultados. Esta liderança pode ser explicada pela quantidade de variáveis que cada otimizador precisou otimizar na \emph{iterated race}.
+
+Os experimentos também mostraram o comportamento dos casos de teste e o que esperar do tempo de execução em cada um deles. Casos com um único objetivo se mostraram não só mais simples de resolver mas os otimizadores também entregaram respostas muito próximas entre si. É possível observar que a complexidade de cada caso depende não só da quantidade de objetivos mas da profundidade da busca. Esta profundidade pode ser vista nos casos que precisam de tarefas no fim da árvore tecnológica, e.g. (b), ou tarefas que demoram excepcionalmente mais que a média de tarefas, e.g. (j). Porém, os únicos casos que possuem tempo de execução aceitável em um ambiente de tempo real são os casos de baixa profundidade, ou os casos (k) a (n). Desta forma, é aconselhável escolher uma aprendizagem \emph{offline} para estratégias que exijam tarefas avançadas, enquanto um processo \emph{online} pode ser implementado para estratégias imediatas. Para o sistema utilizado, a raça Zerg de StarCraft, isto significa estratégias para até cinco minutos à frente do tempo.
+
+Trabalhos futuros neste tema incluem:
+\begin{itemize}
+ 	\item criação de métodos de tomada de decisão e comparação com métodos mono-objetivo para a mesma estratégia;
+ 	\item a utilização de otimizadores em inteligências artificiais para jogos e a comparação do impacto dos otimizadores no desempenho destas inteligências artificiais;
+ 	\item uma comparação mais minuciosa entre os otimizadores, por exemplo utilizando os mesmos parâmetros de criação e reconstrução de soluções;
+ 	\item utilização de operadores mais complexos nos algoritmos genéticos;
+ 	\item comparação entre outros otimizadores.
+ \end{itemize}
+
+Com este trabalho esperamos estimular pesquisas adicionais em otimização multiobjetivo e problemas de escalonamento para RTS, a pesquisa em produção de recursos para ambientes dinâmicos, bem como a utilização de otimizadores em inteligências artificiais para jogos.

@@ -1,0 +1,29 @@
+\chapter{Cronograma}
+
+Até a defesa da dissertação, uma série de atividades serão realizadas para verificar o comportamento do modelo.
+
+\begin{itemize}
+	\item Implementação de tomadores de decisão: a partir de um conjunto de soluções ótimas, uma inteligência artificial para jogos precisa tomar uma decisão sobre qual conjunto de ações realizar. Como todas as ações são igualmente boas, é necessário utilizar um processo de tomada de decisão.
+	\item Comparações entre versões multi-objetiva e mono-objetiva do problema: uma das maneiras de facilitar o processo de tomada de decisão é criar pesos para cada objetivo. Ao se fazer isso, porém, ergue-se a dúvida sobre a necessidade de um processo multi-objetivo para uma decisão mono-objetiva. Uma nova versão dos otimizadores será implementada para englobar o uso de pesos.
+	\item Experimentos com parâmetros mais rígidos: como as meta-heurísticas apresentaram tempos bastante discrepantes, é necessário saber como cada algoritmo se comporta em termos mais igualitários. Para isso, será fixada a quantidade de avaliações que cada otimizador poderá fazer, ao invés da quantidade de iterações.
+	\item Comparações com outra meta-heurística: além do NSGA-II e do MOACO, experimentos serão feitos com uma versão multi-objetiva do GRASP \cite{reynolds09}.
+	\item Escrita de texto: concluir o texto com explicações dos algoritmos, os métodos de tomada de decisão usados.
+\end{itemize}
+
+A tabela \ref{tab:chrono} mostra o planejamento das atividades para o ano de 2016.
+
+\begin{table}
+	\centering
+	\begin{tabular}{l | c | c | c | c}
+	\textbf{Atividade} & 03/16 & 04/16 & 05/16 & 06/16\\
+	\hline
+	Implementação de tomadores de decisão & X & X & X\\
+	Comparações entre versões multi e mono & & X & X\\
+	Experimentos com parâmetros mais rígidos & & X & X & X\\
+	Comparações com outra meta-heurística & X & X & X & X\\
+	Escrita de texto & X & X & X & X\\
+	Defesa & & & & X
+	\end{tabular}
+	\caption{Cronograma de atividades para o ano de 2016}
+	\label{tab:chrono}
+\end{table}

@@ -1,0 +1,194 @@
+\chapter{Meta-heurísticas}
+Quatro otimizadores foram implementados para o problema de produção de recursos com eventos cíclicos e comparados em um experimento computacional: (a) NSGA-II \cite{nsga2}, (b) uma versão do NSGA-II com um algoritmo de ordenação baseado nos ângulos entre as soluções \cite{knees}, (c) uma colônia de formigas multiobjetivo, ou MOACO \cite{ibanez04} e (d) GRASP multiobjetivo, ou MOGRASP \cite{reynolds09}. Embora seja possível encontrar as soluções ótimas através de um algoritmo exato, otimizadores heurísticos foram escolhidos pelo tempo que os algoritmos exatos consomem, tornando-os inviáveis para uso em um cenário real para inteligências artificiais de jogos. Neste capítulo, as versões usadas nos experimentos serão explicadas.
+
+Todos os algoritmos utilizados possuem uma forma de paralelismo. Nos algoritmos genéticos, esse paralelismo se dá na criação e mutação das soluções, no MOACO e MOGRASP na criação de soluções e na busca local. Este paralelismo foi utilizado para acessar todo o poder de processamento de modernas CPU que possuem mais de um núcleo processador.
+
+Além disto, todos os algoritmos utilizam uma única operação de vizinhança: a simples troca de posição entre duas tarefas aleatórias diferentes de uma solução, o que pode resultar em uma solução inválida. Caso a nova solução seja inválida, uma operação de conserto é utilizada até que uma solução válida seja encontrada, baseada no algoritmo de criação de solução aplicado à metaheurística.
+
+\section{NSGA-II}
+
+\begin{algorithm}[t]
+\begin{algorithmic}[1]
+\Procedure{NSGAII}{$I_0$, $O$, $\delta_o$, $\delta_r$, $\Delta_o$, $\Delta_r$, $c$, $\delta_o^F$, $\delta_r^F$, $\Delta_o^F$, $\Delta_r^F$, $it$}
+\State $x \gets$ \Call{gerarParalelo}{$c$, $\delta_o$, $\delta_r$, $\Delta_o$, $\Delta_r$}
+\State \Call{avaliar\_ordenar}{$x$, $O$}
+\For{$i = 1$ \textbf{até} $it$}
+  \State $x \gets$ \Call{selecionar}{$x$}
+  \State $\dot{x} \gets \emptyset$
+  \ForAll{$s \in x$ \emph{em paralelo}}
+    \State $\dot{x} \gets \dot{x}$ $\cup$ \Call{mutar}{$s$, $\delta_o^F$, $\delta_r^F$, $\Delta_o^F$, $\Delta_r^F$}
+  \EndFor
+  \State $x \gets x$ $\cup$ $\dot{x}$
+  \State \Call{avaliar\_ordenar}{$x$, $O$}
+\EndFor
+\EndProcedure
+\end{algorithmic}
+\caption{NSGA-II Simplificado}
+\label{alg:nsga}
+\end{algorithm}
+
+Dois algoritmos genéticos foram implementados, ambos baseados numa simplificação da meta-heurística NSGA-II. Estas versões diferem apenas no funcionamento do método de ordenação, \emph{avaliar\_ordenar}, onde foram usados o método original baseado em distância entre soluções e um método alternativo baseado nos ângulos entre as soluções do conjunto de aproximação. A operação de seleção, \emph{selecionar}, é a mesma para os dois casos, isto é, a partir de uma população com o dobro do tamanho permitido $L$, seleciona-se as melhores $L$ soluções. Em ambos os casos, a operação de mutação é uma simples troca de posição entre duas tarefas.
+
+O algoritmo base (ver Algoritmo \ref{alg:nsga}) recebe como entrada o estado inicial $I_0$, a estratégia $O$, os valores de contribuição $\delta_o,\delta_r$ e os valores de incremento $\Delta_o, \Delta_r$ para o algoritmo de criação, o tamanho $n$ do arquivador, os valores $\delta_o^F,\delta_r^F, \Delta_o^F, \Delta_r^F$ para o algoritmo de reconstrução, além da quantidade de iterações $it$. Inicialmente são geradas aleatoriamente as soluções, e então o algoritmo as avalia e ordena. Dentro do laço iterativo, o algoritmo seleciona as soluções do conjunto, seguindo a seleção do NSGA-II em que as $N$ melhores soluções são selecionadas de acordo com o algoritmo de ordenação, onde $N$ é o tamanho do arquivador. A implementação utilizada para o NSGA-II não possui um operador de cruzamento nem uma chance de mutação. Ao invés disto, novas gerações são criadas a partir de todas as soluções do conjunto atual através de uma simples mutação. Finalmente, o conjunto de soluções é avaliado e ordenado no fim do laço. Para acelerar o desempenho do algoritmo, a criação e a mutação das soluções são feitas em paralelo.
+
+\subsection{``Knee''}
+
+\begin{algorithm}
+\begin{algorithmic}[1]
+\Procedure{KneeSort}{$x$, $O$}
+
+\State $x' \gets$ \Call{ordenarNaoDominado}{$x$, $O$} \Comment{Mesma ordenação usada no NSGA-II}
+\ForAll{$I \in x'$}
+  \State $metrica \gets$ $\{ 0, \dots, 0 \}$
+  \ForAll{$m \in M \cup N$}
+    \State \Call{ordernarDescendente}{$I$, $m$} \Comment{Ordena pelo objetivo $m$}
+    \State $metrica[I[1]] \gets metrica[I[|I|]] \gets \infty$ \Comment{Valores extremos são selecionados}
+  \EndFor
+  \For{$i = 2$ \textbf{até} $|I|-1$ \emph{em paralelo}}
+    \If{$metrica[i] = 0$}
+      \State $A \gets$ $\{v \in I | \not{\exists} v' \in I \setminus \{I[1],I[|I|],I[i]\}, ||v'-i|| < ||v-i||\}$
+      \State $B \gets$ $\{v \in I | Ortante(v-I[i]) \neq Ortante(A-I[i])\}$
+      \State $B \gets$ $\{v \in B | \not{\exists} v' \in I \setminus \{I[1],I[|I|],I[i],A\},||v'-i|| < ||v-i||\}$
+      \State $A \gets A - i$
+      \State $B \gets B - i$
+      \State $metrica[i] \gets 2 \pi - arccos\left(\frac{A \cdot B}{||A|| ||B||}\right)$
+    \EndIf
+  \EndFor
+  \State \Call{ordernarDescendente}{I, $metrica$}
+\EndFor
+
+\EndProcedure
+\end{algorithmic}
+\caption{Algoritmo de ordenação baseada em ângulos}
+\label{alg:knee}
+\end{algorithm}
+
+Em seu trabalho sobre a busca de joelhos em otimização multiobjetivo, \citeonline{knees} apresentaram duas abordagens para o otimizador: (a) otimizador focado em ângulo e (b) otimizador focado em utilidade. Estas alterações se dão como substituição do algoritmo de ordenação do NSGA-II, \emph{crowding distance}. Os experimentos feitos aqui mostraram resultados para o otimizador focado em ângulo. Esta abordagem verifica o ângulo que existe entre dois pontos e um determinado eixo. Essa comparação é feita usando cada um dos pontos como eixo.
+
+Inicialmente, o algoritmo de ordenação (ver algoritmo \ref{alg:knee}) classifica as soluções de acordo com o seu grau de dominância, utilizando o mesmo método do NSGA-II. Estas soluções estão divididas em conjuntos de forma que cada conjunto domine todos os seguintes. Então, para cada conjunto $I$ serão calculados valores para cada solução, referentes à métrica de ordenação. Os valores são inicializados em zero, e os pontos extremos para cada função objetivo recebem o valor infinito, para que eles sejam sempre selecionados. Os demais pontos utilizarão o ângulo entre os pontos mais próximos que não estão no mesmo ortante em relação ao eixo $i$. Isto é feito selecionando o ponto mais próximo da solução $i$, e o segundo ponto mais próximo de $i$ que não esteja no mesmo ortante que o anterior.
+
+
+\section{MOGRASP}
+
+\begin{algorithm}[t]
+\begin{algorithmic}[1]
+\Procedure{MOGRASP}{$I_0$, $O$, $\delta_o$, $\delta_r$, $\Delta_o$, $\Delta_r$, $c$, $n$, $\delta_o^F$, $\delta_r^F$, $\Delta_o^F$, $\Delta_r^F$, $it$}
+\State $x* \gets \emptyset$
+\For{$i = 1$ \textbf{até} $it$}
+  \State $\dot{x} \gets $ \Call{gerarParalelo}{$c$, $\delta_o$, $\delta_r$, $\Delta_o$, $\Delta_r$}
+  
+  \State $x* \gets x* \cup$ $\dot{x}$
+  \State $x* \gets \{x' \in x* | \not{\exists} x_i \in x*, x_i \succ x'\}$
+  
+  \State $x* \gets $ \Call{buscaLocal}{$x*$, $n$, $\delta_o^F$, $\delta_r^F$, $\Delta_o^F$, $\Delta_r^F$}
+  \State $x* \gets \{x' \in x* | \not{\exists} x_i \in x*, x_i \succ x'\}$
+\EndFor
+
+\State \Return $x*$
+\EndProcedure
+\end{algorithmic}
+\caption{GRASP multiobjetivo}
+\label{alg:mograsp}
+\end{algorithm}
+
+A versão multiobjetivo do GRASP utilizada neste trabalho (algoritmo \ref{alg:mograsp}) utiliza conjuntos de aproximação ao invés de soluções, tanto para o algoritmo de criação quanto para o algoritmo de busca local. A cada iteração, o algoritmo gera $c$ novas soluções paralelamente, usando o mesmo processo de criação que o NSGA-II. Essas soluções são adicionadas ao conjunto de aproximação e as soluções não-dominadas são filtradas. Então, um algoritmo de busca local baseado em conjuntos inicia sua busca a partir deste conjunto, e as soluções encontradas são colocadas no conjunto de aproximação e filtradas.
+
+O algoritmo \ref{alg:mograsp} utiliza a busca local baseada em conjuntos \cite{basseur13}, onde a busca local trabalha em conjuntos de soluções ao invés de soluções individuais. A relação de vizinhança utilizada foi $\mathtt{N}^{(\star,\star)}$, uma vez que um número $n$ de vizinhos é calculado para cada solução do conjunto atual. A operação de vizinhança usada foi uma simples troca entre duas tarefas. O algoritmo de conserto de soluções é aplicado após a operação de vizinhança, caso a solução final seja inválida. Como o algoritmo de conserto possui necessidades diferentes das necessidades do algoritmo de criação, pesos diferentes são passados para cada um deles. Estes pesos são $\delta_o^F$, $\delta_r^F$, $\Delta_o^F$ e $\Delta_r^F$.
+
+Para encontrar a melhor fronteira de aproximação, o MOGRASP utilizou uma versão paralela do arquivador de grade adaptativa, ou \emph{Adaptive Grid Archiver} \cite{knowles03}. Esta versão utiliza \emph{threads} diferentes para selecionar os vetores unicamente extremos e para calcular os limites do hipercubo.
+
+\section{MOACO}
+
+\begin{algorithm}[t]
+\begin{algorithmic}[1]
+\Procedure{criarFormiga}{$I_0$, $O$, $\delta_o$, $\delta_r$, $\Delta_o$, $\Delta_r$, $\tau$, $\alpha$, $\beta$}
+\State $x \gets \emptyset$
+\State $r \gets 1$
+\While{\textbf{não} \Call{valido}{$x$}}
+  \State $\eta \gets$ \Call{pesosIniciais}{$\delta_o$, $\delta_r$, $I_0$, $O$}
+  \State $\delta_o \gets \delta_o\Delta_o$
+  \State $\delta_r \gets \delta_r\Delta_r$
+  \State $x \gets x$ $\cup$ \Call{escolhaFormiga}{$\tau$, $\eta$, $\alpha$, $\beta$}
+  \If{$S_{max}(x) > UB$} \Comment{Caso a última tarefa seja inválida}
+    \State $tamanho \gets$ \Call{$x.$tamanho}{}
+    \State \Call{$x$.redimensionar}{$tamanho - r$} \Comment{Reduz o tamanho da solução}
+    \State $r \gets r + 1$
+    \If{$r >$ \Call{$x.$tamanho}{}}
+      \State $r \gets 1$
+    \EndIf
+  \EndIf
+\EndWhile
+
+\State \Return $x$
+\EndProcedure
+\end{algorithmic}
+\caption{Criação de soluções através de formigas}
+\label{alg:ant}
+\end{algorithm}
+
+\begin{algorithm}
+\begin{algorithmic}[1]
+\Procedure{MOACO}{$I_0$, $O$, $\delta_o$, $\delta_r$, $\Delta_o$, $\Delta_r$, $\rho$, $\alpha$, $\beta$, $n$, $\delta_o^F$, $\delta_r^F$, $\Delta_o^F$, $\Delta_r^F$, $formigas$, $it$}
+\State $x* \gets \emptyset$
+\State \Call{inicializar}{$\tau$}
+\For{$i = 1$ \textbf{até} $it$}
+  \State $\dot{x} \gets \emptyset$
+  \For{$f \in formigas$ \emph{em paralelo}}
+  	\State $x \gets $ \Call{criarFormiga}{$I_0$, $O$, $\delta_o$, $\delta_r$, $\Delta_o$, $\Delta_r$, $\tau$, $\alpha$, $\beta$}
+    \State $x \gets $ \Call{buscaLocal}{$x$, $n$, $\delta_o^F$, $\delta_r^F$, $\Delta_o^F$, $\Delta_r^F$}
+   	\State $\dot{x} \gets \dot{x}$ $\cup$ $x$
+  \EndFor
+  \State $x* \gets x*$ $\cup$ $\dot{x}$
+  \State $x* \gets \{x' \in x* | \not{\exists} x_i \in x*, x_i \succ x'\}$
+  \State \Call{atualizar}{$\tau$, $\rho$}
+\EndFor
+
+\State \Return $x*$
+\EndProcedure
+\end{algorithmic}
+\caption{Colônia de formigas multiobjetivo}
+\label{alg:moaco}
+\end{algorithm}
+
+Os otimizadores descritos até agora utilizaram o método de criação de soluções mostrado no capítulo anterior. Para usar um algoritmo baseado em formigas, um novo algoritmo de criação é proposto, que se baseia em um grafo que conecta todas as tarefas entre si e com um outro vértice que aponta para o início da solução (veja Figura~\ref{fig:ants}). Este grafo indica os passos que uma formiga tomaria para chegar à última tarefa. Para aplicar a criação de formigas ao problema de produção de recursos, o algoritmo de criação, exposto no algoritmo \ref{alg:ant}, utiliza um único tipo de feromônio \cite{ibanez04}. Assim, um grafo deste tipo é utilizado para guardar as informações dos feromônios, enquanto as informações heurísticas não dependeriam da última tarefa escolhida.
+
+\begin{figure}[b]
+  \centering
+  \scalebox{0.7} {
+    \begin{tikzpicture}[->, shorten >=1pt,auto,ultra thick]
+      \tikzstyle{task}=[rectangle,fill=black!40,minimum size=1cm,node distance=3cm,align=center]
+      \node[initial,task] (S) {$S$};
+      \node[task] (T0) [above right of=S] {$T_0$};
+      \node[task] (T1) [right of=S]       {$T_1$};
+      \node[task] (T2) [below right of=S] {$T_2$};
+      \path
+        (S) edge node { } (T0)
+        (S) edge node { } (T1)
+        (S) edge node { } (T2)
+
+        (T1) edge node { } (T0)
+        (T2) edge node { } (T0)
+        (T2) edge node { } (T1)
+        
+        (T0) edge node { } (T1)
+        (T0) edge node { } (T2)
+        (T1) edge node { } (T2);
+    \end{tikzpicture}
+  }
+  \caption{Grafo para um algoritmo de criação de soluções baseado em formigas.}
+  \label{fig:ants}
+\end{figure}
+
+
+O algoritmo de criação recebe como entrada o estado inicial $I_0$, a estratégia $O$, os pesos e multiplicadores $\delta_o,\delta_r,\Delta_o,\Delta_r$, a taxa de evaporação $\tau$, a influência dos feromônios $\alpha$ e a influência da heurística $\beta$. A partir de uma solução vazia, o algoritmo escolhe uma tarefa baseado nos pesos iniciais e nos feromônios deixados por formigas anteriores. O algoritmo \ref{alg:ant} utiliza informações heurísticas e de feromônio da mesma maneira que o Ant System, como na equação 7.1.
+\begin{equation}
+  p_{ij}(t) = \frac{[\tau_{ij}(t)]^\alpha[\eta_{ij}]^\beta}{\sum_k [\tau_{ik}(t)]^\alpha[\eta_{ik}]^\beta}
+\end{equation}
+
+Como este problema possui um ou mais objetivos, o feromônio reflete a sequência de tarefas em cada solução da fronteira de aproximação atual. A cada iteração, o feromônio $\tau_{ij}(t)$ é igual ao número total de transições da tarefa $i$ para a tarefa $j$ em cada solução da fronteira no tempo $t-1$. A informação heurística reflete os pesos dados pela função $initialWeights$ descrita no capítulo 6, que não requer uma sequência de tarefas.
+
+O algoritmo continua escolhendo até que a solução seja válida ou que uma tarefa seja alocada num tempo superior ao horizonte do projeto. Neste caso, ele retira uma quantidade de tarefas incremental do fim da solução e continua a alocar mais tarefas. A cada iteração, os valores dos pesos são aumentados pelas taxas $\Delta_o$ e $\Delta_r$, o que direciona as escolhas da formiga.
+
+O algoritmo de busca local utilizado é o mesmo usado pelo MOGRASP, usando a mesma relação de vizinhança $\mathtt{N}^{(\star,\star)}$. O arquivador utilizado pelo foi o arquivador de grade adaptativa, ou \emph{Adaptive Grid Archiver}, na versão paralela utilizada pelo MOGRASP.
+
+Uma vez que a execução de uma formiga não interfere nos resultados das outras formigas da mesma iteração, cada formiga pode ser executada em processos paralelos \cite{parallelaco}. O método de busca local utilizado faz uma varredura na vizinhança de cada formiga, também em paralelo: há uma \emph{thread} diferente para cada vizinho de cada solução do conjunto. Desta forma, todas as soluções vizinhas do conjunto atual são visitadas paralelamente a cada iteração.

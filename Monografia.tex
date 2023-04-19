@@ -1,0 +1,331 @@
+% Pre-ambulo
+\documentclass[a4paper, 12pt, fleqn]{abnt}
+
+\usepackage[brazil]{babel}
+\usepackage[latin1]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{hyperref}
+\usepackage{dsfont}
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{multirow}
+\usepackage[alf]{abntcite}
+\usepackage[pdftex]{color, graphicx}
+\usepackage{colortbl}
+\usepackage{url}
+\usepackage{abnt-alf}
+\usepackage{abntcite}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{rotating}
+\usepackage{tikz}
+\usetikzlibrary{shapes,automata}
+%\usepackage{pgfplots}
+\usepackage{subfig}
+\usepackage{rotating}
+\usepackage{enumerate}
+\usepackage{tabu}
+\usepackage{longtable}
+%\usepackage{alg}
+\usepackage{pdfpages}
+
+\definecolor{sixpool}{RGB}{198, 30, 30}
+\definecolor{ninepool}{RGB}{240, 175, 115}
+\definecolor{overpool}{RGB}{60, 120, 230}
+\definecolor{twelpool}{RGB}{10, 150, 30}
+\definecolor{twelhatch}{RGB}{120, 20, 150}
+
+\definecolor{distance}{RGB}{63, 51, 4}
+\definecolor{patches}{RGB}{44, 44, 171}
+\definecolor{minerals}{RGB}{88, 171, 183}
+\definecolor{gas}{RGB}{23, 73, 0}
+
+\newcommand{\V}[1]{\v{#1}}
+
+% argument #1: any options
+\newenvironment{customlegend}[1][]{%
+    \begingroup
+    % inits/clears the lists (which might be populated from previous
+    % axes):
+    \csname pgfplots@init@cleared@structures\endcsname
+    \pgfplotsset{#1}%
+}{%
+    % draws the legend:
+    \csname pgfplots@createlegend\endcsname
+    \endgroup
+}%
+
+% makes \addlegendimage available (typically only available within an
+% axis environment):
+\def\addlegendimage{\csname pgfplots@addlegendimage\endcsname}
+
+\newcommand{\subsubfloat}[2]{\begin{tabular}{@{}c@{}}#2\\ \footnotesize{#1}\end{tabular}}
+
+% Redefinicao de instrucoes
+\floatname{algorithm}{Algoritmo}
+\renewcommand{\algorithmicrequire}{\textbf{Entrada:}}
+\renewcommand{\algorithmicensure}{\textbf{Sada:}}
+\renewcommand{\algorithmicend}{\textbf{fim}}
+\renewcommand{\algorithmicif}{\textbf{se}}
+\renewcommand{\algorithmicthen}{\textbf{então}}
+\renewcommand{\algorithmicelse}{\textbf{senão}}
+\renewcommand{\algorithmicfor}{\textbf{para}}
+\renewcommand{\algorithmicforall}{\textbf{para todo}}
+\renewcommand{\algorithmicdo}{\textbf{faça}}
+\renewcommand{\algorithmicwhile}{\textbf{enquanto}}
+\renewcommand{\algorithmicloop}{\textbf{loop}}
+\renewcommand{\algorithmicrepeat}{\textbf{repetir}}
+\renewcommand{\algorithmicuntil}{\textbf{até que}}
+\renewcommand{\algorithmicfunction}{\textbf{função}}
+\renewcommand{\algorithmicprocedure}{\textbf{procedimento}}
+\renewcommand{\algorithmicreturn}{\textbf{retorne}}
+%\renewcommand{\algorithmiccomment}[1]{\% #1}
+
+
+% Definicao da lista de simbolos
+% \simb[entrada na lista de simbolos]{simbolo}:
+% Escreve o simbolo no texto e uma entrada na lista de simbolos.
+% Se o parametro opcional e omitido, usa-se o parametro obrigatorio.
+\newcommand{\simb}[2][]
+{%
+	\ifthenelse{\equal{#1}{}}
+	{\addcontentsline{los}{simbolo}{#2}}
+	{\addcontentsline{los}{simbolo}{#1}}#2
+}
+% Para aceitar comandos com @ (at) no nome
+\makeatletter 
+% \listadesimbolos: comando que imprime a lista de simbolos
+\tabulinesep=2mm
+\newcommand{\listadesimbolos}
+{
+	\pretextualchapter{Lista de símbolos}
+	\begin{longtabu}{l X[-1]}
+	%{\setlength{\parindent}{0cm}
+	%\@starttoc{los}}
+	$\alpha$ & Influência dos feromônios no algoritmo MOACO\\
+	$\beta$ & Influência da heurística no algoritmo MOACO\\
+	$\delta_c$ & Contribuição de custos e consumos de tarefas úteis, para o algoritmo de criação de soluções\\
+	$\delta_m$ & Contribuição do aumento do máximo utilizável de um recurso produzido por tarefas úteis, para o algoritmo de criação de soluções\\
+	$\delta_o$ & Contribuição de objetivos, para o algoritmo de criação de soluções\\
+	$\delta_p$ & Contribuição de pré-requisitos e usos de tarefas úteis, para o algoritmo de criação de soluções\\
+	$\delta_r$ & Contribuição de restrições, para o algoritmo de criação de soluções\\
+	$\delta^F_o$ & Contribuição de objetivos, para o algoritmo de reconstrução de soluções\\
+	$\delta^F_r$ & Contribuição de restrições, para o algoritmo de reconstrução de soluções\\
+	$\Delta_o$ & Fator de aumento do contribuição $\delta_o$, no algoritmo de criação de soluções\\
+	$\Delta_r$ & Fator de aumento do contribuição $\delta_r$, no algoritmo de criação de soluções\\
+	$\Delta^F_o$ & Fator de aumento do contribuição $\delta^F_o$, no algoritmo de reconstrução de soluções\\
+	$\Delta^F_r$ & Fator de aumento do contribuição $\delta^F_r$, no algoritmo de reconstrução de soluções\\
+	$\rho$ & Taxa de evaporação dos feromônios no algoritmo MOACO\\
+	$\hat\tau_i$ & Tempo real de início do evento $i$, para o PPPREC\\
+	$B_{rt}$ & Quantidade do recurso $r$ imobilizada no tempo $t$, para o PPPR\\
+	$Bo_{ir}$ & Quantidade do recurso $r$ necessária como uso para realização da tarefa $i$, para o PPPR\\
+	$c$ & Quantidade de soluções criadas pelos algoritmos heurísticos\\
+	$C_{max}$ & Tempo de conclusão da última tarefa (\emph{makespan})\\
+	$C_{rt}$ & Total coletado do recurso $r$ a partir do estado inicial até o tempo $t$, \par para o PPPR\\
+	$Cm_{ir}$ & Quantidade do recurso $r$ necessária como consumo para realização da tarefa $i$, para o PPPR\\
+	$Ct_{ir}$ & Quantidade do recurso $r$ necessária como custo para realização da tarefa $i$, para o PPPR\\
+	$d_i$ & Duração da tarefa $i$, para o PPPR\\
+	$\check{d}_{im}$ & Duração da tarefa $i$ no modo $m$, para o PPPMRR\\
+	$\hat{e}_i$ & Tempo de término da tarefa $i$, para o PPOPR\\
+	$\check{E}$ & Conjunto de arestas que representam precedências, para o PPPMRR\\
+	$E_{sr}$ & Valor binário que indica a equivalência entre os recursos $s$ e $r$, para o PPPR\\
+	$ES_i$ & Tempo mais cedo de início da tarefa $i$, para o PPPMRR\\
+	$\check{G}$ & Grafo dirigido representativo da rede de dependências do projeto, para o PPPMRR\\
+	$K$ & Conjunto de limites superiores para as funções do conjunto $U$, para o PPPR\\
+	$I_0$ & Estado inicial, para o PPPR\\
+	$L$ & Conjunto de limites inferiores para as funções do conjunto $V$, para o PPPR\\
+	$LB$ & Menor tempo de início de uma tarefa ou evento presente no estado inicial $I_0$, para o PPPREC\\
+	$LS_i$ & Tempo mais tardio de início da tarefa $i$, para o PPPMRR\\
+	$\hat{m}_r$ & Valor mínimo para o recurso $r$, para o PPOPR\\
+	$M$ & Conjunto de funções-objetivo para maximizar, para o PPPR\\
+	$\check{M}_i$ & Quantidade de modos da tarefa $i$, para o PPPMRR\\
+	$MC_r$ & Máximo coletável do recurso $r$ a partir do estado inicial até o tempo $t$, para o PPPR\\
+	$MU_{rs}$ & Máximo utilizável do recurso $r$ por unidade de outro recurso $s$, no PPPR\\
+	$\check{n}_{ilm}$ & Quantidade consumida do recurso não-renovável $l$ pela tarefa $i$ no modo $m$, para o PPPMRR\\
+	$N$ & Conjunto de funções-objetivo para minimizar, para o PPPR\\
+	$\mathtt{N}^{(\star,\star)}$ & Relação de vizinhança de conjuntos em que soluções de vizinhanças de várias soluções de um conjunto são adicionadas à fronteira de aproximação, para buscas locais multiobjetivo baseadas em conjuntos\\
+	$\check{N}$ & Conjunto de recursos não-renováveis, para o PPPMRR\\
+	$\check{N}_l$ & Quantidade inicial do recurso não-renovável $l$, para o PPPMRR\\
+	$O$ & Estratégia a ser otimizada pelo PPPR\\
+	$\hat{O}$ & Conjunto de restrições, para o PPOPR\\
+	$Pr_{ir}$ & Quantidade do recurso $r$ necessária como pré-requisito para realização da tarefa $i$, para o PPPR\\
+	$\hat{q}_r$ & Quantidade de recurso $r$, para o PPOPR\\
+	$\check{r}_{ikm}$ & Quantidade requerida do recurso renovável $k$ pela tarefa $i$ no modo $m$, para o PPPMRR\\
+	$R$ & Conjunto de recursos, para o PPPR\\
+	$\check{R}$ & Conjunto de recursos renováveis, para o PPPMRR\\
+	$\hat{R}$ & Conjunto de recursos, para o PPOPR\\
+	$\check{R}_k$ & Quantidade disponível do recurso renovável $k$, para o PPPMRR\\
+	$\hat{s}_i$ & Tempo de início da tarefa $i$, para o PPOPR\\
+	$S$ & Sistema que representa o jogo, para o PPPR\\
+	$S_{max}$ & Tempo de início da última tarefa, para o PPPR\\
+	$T$ & Conjunto de tarefas, para o PPPR\\
+	$\hat{T}$ & Conjunto de tarefas não-concluídas, para o PPOPR\\
+	$\check{T}_f$ & Tarefa postiça final, para o PPPMRR\\
+	$\check{T}_{im}$ & Modo $m$ da tarefa não-postiça $i$, para o PPPMRR\\
+	$u_{rt}$ & Total consumido do recurso $r$ a partir do estado inicial até o tempo $t$, para o PPPR\\
+	$U$ & Conjunto de funções de restrição com limite superior, para o PPPR\\
+	$U_{rt}$ & Quantidade utilizável do recurso $r$ a partir do estado inicial até o tempo $t$, para o PPPR\\
+	$UB$ & Tempo máximo para execução da ordem de tarefas, ou horizonte do projeto\\
+	$V$ & Conjunto de funções de restrição com limite inferior, para o PPPR\\
+	$\check{V}$ & Conjunto de vértices que representam tarefas, para o PPPMRR\\
+	$x$ & Variável de decisão do PPPR\\
+	$x^e$ & Variável de decisão adicional do PPPREC\\
+	$\check{x}_{imt}$ & Variável de decisão do PPPMRR\\
+	$y_f$ & Valor da função $f$ no tempo de conclusão da última tarefa ou no tempo máximo, caso a última tarefa termine após este tempo, para o PPPR\\
+
+	\end{longtabu}
+}
+% Como a entrada sera impressa
+\newcommand\l@simbolo[2]{\par #1}
+\makeatother
+
+
+% Definicao da lista de abreviaturas e siglas
+% \abrv[entrada na lista de simbolos]{abreviatura}:
+% Escreve a sigla/abreviatura no texto e uma entrada na lista de abreviaturas e siglas.
+% Se o parametro opcional e omitido, usa-se o parametro obrigatorio.
+\newcommand{\abrv}[2][]
+{%
+	\ifthenelse{\equal{#1}{}}
+	{\addcontentsline{loab}{abreviatura}{#2}}
+	{\addcontentsline{loab}{abreviatura}{#1}}#2
+}
+% Para aceitar comandos com @ (at) no nome
+\makeatletter 
+% \listadeabreviaturas: comando que imprime a lista de abreviaturas e siglas
+\newcommand{\listadeabreviaturas}
+{
+	\pretextualchapter{Lista de abreviaturas e siglas}
+	\begin{longtabu}{l X[-1]}
+	AIIDE & \emph{Artificial Intelligence and Interactive Digital Entertainment}\\
+	CIG & \emph{Computational Intelligence and Games}\\
+	GRASP & \emph{Greedy Randomized Adaptve Search Procedure}\\
+	IA & Inteligência Artificial\\
+	IEEE & \emph{Institute of Electrical and Electronics Engineers}\\
+	MOACO & \emph{Multi-Objective Ant Colony Optimization}\\
+	MOGRASP & \emph{Multi-Objective} GRASP\\
+	NSGA-II & \emph{Non-Dominated Sorting Genetic Algorithm} II\\
+	PDDL & \emph{Planning Domain Definition Language}\\
+	PPOPR & Problema de Planejamento \emph{Online} para Produção de Recursos em RTS\\
+	PPPMRR & Problema de Planejamento de Projetos Multimodo com Restrição de Recursos\\
+	PPPR & Problema de Planejamento para Produção de Recursos\\
+	PPPREC & Problema de Planejamento para Produção de Recursos com Eventos Cíclicos\\
+	RTS & \emph{Real-Time Strategy}\\
+	SLA* & \emph{Search and Learn} A*\\
+	\end{longtabu}
+}
+% Como a entrada sera impressa
+\newcommand\l@abreviatura[2]{\par #1}
+\makeatother
+
+
+% \listofalgorithms: comando que imprime a lista de algoritmos
+\renewcommand{\listalgorithmname}{Lista de algoritmos}
+
+
+% Hifenizao de palavras feita de forma incorreta pelo LaTeX
+\hyphenation{PYTHON ou-tros}
+
+
+\def\Title{Modelos e Algoritmos para o Problema de Planejamento para Produção de Recursos em Jogos de Estratégia de Tempo Real}
+\def\Author{Caio Freitas de Oliveira}
+\def\Date{Agosto de 2016}
+\def\Advisor{Dra. Elizabeth Ferreira Gouvêa Goldbarg}
+%\def\Advisor{Dr. Charles Andryê Galvão Madeira}
+%\def\Coadvisor{Dr. André Maurício Cunha Campos}
+\def\ForeignTitle{Models and Algorithms for the Resource Production Scheduling Problem on Real-time Strategy Games}
+
+\hypersetup{
+     	%pagebackref=true,
+		pdftitle={\Title}, 
+		pdfauthor={\Author},
+    	pdfsubject={---},
+	    pdfcreator={LaTeX with abnTeX},
+		pdfkeywords={---}{Trabalho Acadêmico}, 
+		colorlinks=true,       		% false: boxed links; true: colored links
+    	linkcolor=black,          	% color of internal links
+    	citecolor=black,        		% color of links to bibliography
+    	filecolor=magenta,      		% color of file links
+		urlcolor=black,
+		bookmarksdepth=4
+}
+
+% Inicio do documento
+\begin{document}
+
+	\frenchspacing
+	
+	% Capa (arquivo Includes/Capa.tex)
+	\include{Includes/Capa}
+
+	% Folha de rosto (arquivo Includes/FolhaRosto.tex)
+	\include{Includes/FolhaRosto}	
+	
+	\includepdf[pages=1]{Includes/FichaCatalografica.pdf}
+
+	% Folha de aprovacao (arquivo Includes/FolhaAprovacao.tex)
+	\include{Includes/FolhaAprovacao}	
+	
+	% Dedicatoria (arquivo Includes/Dedicatoria.tex)
+	% \include{Includes/Dedicatoria}
+	
+	% Agradecimentos (arquivo Includes/Agradecimentos.tex)
+	% \include{Includes/Agradecimentos}
+  
+   % Epigrafe (arquivo Includes/Epigrafe.tex)
+	\include{Includes/Epigrafe}
+	
+	% Resumo em lngua vernacula (arquivo Includes/Resumo.tex)
+	\include{Includes/Resumo}
+	
+	% Abstract, resumo em lngua estrangeira (arquivo Include/Abstract.tex)
+	\include{Includes/Abstract}
+	
+	% Lista de figuras
+	\listoffigures
+
+	% Lista de tabelas
+	\listoftables
+	
+	% Lista de abreviaturas e siglas
+	\listadeabreviaturas
+	
+	% Lista de smbolos
+	\listadesimbolos
+	
+	% Lista de algoritmos (se houver)
+	% Devem ser includos os pacotes algorithm e algorithmic
+	\listofalgorithms
+	
+	% Sumrio
+	\sumario
+
+	% Parte central do trabalho, englobando os captulos que constituem o mesmo
+	% Os referidos captulos devem ser organizados dentro do diretrio "Captulos"
+
+	\include{Capitulos/Introducao}
+	\include{Capitulos/Capitulo1}
+	%\include{Capitulos/Capitulo2}
+	\include{Capitulos/Capitulo3}
+	%\include{Capitulos/Capitulo4}
+	\include{Capitulos/Capitulo5}
+	\include{Capitulos/Capitulo6}
+	\include{Capitulos/Capitulo7}
+	\include{Capitulos/Conclusao}
+	
+	%\include{Capitulos/Consideracoes}
+	
+	% Bibliografia (arquivo Capitulos/Referencias.bib)
+	\bibliography{Capitulos/Referencias}
+	\bibliographystyle{abnt-alf}
+	
+	% Apndice A (arquivo Includes/ApendiceA)
+	\include{Capitulos/ApendiceA}
+	
+	% Anexo A (arquivo Includes/AnexoA)
+%	\include{Capitulos/AnexoA}
+	
+	% Pgina em branco
+	\newpage
+
+\end{document}
