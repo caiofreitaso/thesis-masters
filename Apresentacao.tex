@@ -1,0 +1,926 @@
+\documentclass{beamer}
+%
+% Choose how your presentation looks.
+%
+% For more themes, color themes and font themes, see:
+% http://deic.uab.es/~iblanes/beamer_gallery/index_by_theme.html
+%
+\usepackage{etex}
+%\reserveinserts{28}
+
+\mode<presentation>
+{
+  \usetheme{Darmstadt}      % or try Darmstadt, Madrid, Warsaw, ...
+  \usecolortheme{default} % or try albatross, beaver, crane, ...
+  \usefonttheme{default}  % or try serif, structurebold, ...
+  \setbeamertemplate{navigation symbols}{}
+  \setbeamertemplate{caption}[numbered]
+} 
+%\usepackage[portuguese,ruled,vlined,linesnumbered]{algorithm2e}
+\usepackage[latin1]{inputenc}
+\usepackage[brazil]{babel}
+\usepackage{amsmath}
+\usepackage{graphicx}
+\usepackage{pgfplots}
+\usepackage[maxfloats=33]{morefloats}
+\usepackage{subfig}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{etoolbox}% http://ctan.org/pkg/etoolbox
+
+\usepackage{tikz}
+\usetikzlibrary{shapes,automata}
+\AtBeginEnvironment{figure}{\setcounter{subfigure}{0}}
+
+\definecolor{sixpool}{RGB}{198, 30, 30}
+\definecolor{ninepool}{RGB}{240, 175, 115}
+\definecolor{overpool}{RGB}{60, 120, 230}
+\definecolor{twelpool}{RGB}{10, 150, 30}
+\definecolor{twelhatch}{RGB}{120, 20, 150}
+
+\definecolor{distance}{RGB}{63, 51, 4}
+\definecolor{patches}{RGB}{44, 44, 171}
+\definecolor{minerals}{RGB}{88, 171, 183}
+\definecolor{gas}{RGB}{23, 73, 0}
+
+%\SetAlFnt{\footnotesize\sf}
+\title{Problema de Planejamento para Produção de Recursos}
+\author{Caio Freitas de Oliveira}
+\institute{Departamento de Informática e Matemática Aplicada\\Universidade Federal do Rio Grande do Norte}
+\titlegraphic{\includegraphics[width=1.02cm, height=1.2cm]{Imagens/Brasao-UFRN.jpg}\hspace*{4.75cm}\includegraphics[width=1.44cm, height=1.2cm]{Imagens/Logotipo-DIMAp.jpg}}
+\date{5 de agosto de 2016}
+
+\begin{document}
+
+\begin{frame}
+  \titlepage
+\end{frame}
+
+% Uncomment these lines for an automatically generated outline.
+\begin{frame}{Sumário}
+  \scalebox{.65}{
+    \begin{minipage}{1\linewidth}
+      \tableofcontents
+    \end{minipage}
+  }
+\end{frame}
+
+\section{Introdução}
+\subsection{Jogos de Estratégia em Tempo Real}
+\begin{frame}{StarCraft}
+\begin{figure}
+  \centering
+  \includegraphics[scale=0.4]{Imagens/Base.jpg}
+  \label{fig:sc}
+\end{figure}
+\end{frame}
+
+\begin{frame}{Inteligência Artificial para RTS}
+  \cite{ontanon13} expuseram os seis atuais desafios na criação de \emph{game AI} para RTS:
+  \begin{itemize}
+    \item planejamento,
+    \item aprendizado,
+    \item incerteza,
+    \item raciocínio temporal e espacial,
+    \item exploração do conhecimento de domínio,
+    \item decomposição de tarefas 
+  \end{itemize}
+\end{frame}
+
+\subsection{Problemas de Planejamento e RTS}
+\begin{frame}{Planejamento de Produção (I)}
+  \begin{itemize}
+    \item StarCraft é dinâmico.
+    \item Dinamicidade implica em previsões a partir de fotografias.
+    \item Como reproduzir o ambiente dinâmico sem quebrar suas mecânicas?
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Planejamento de Produção (II)}
+  \begin{itemize}
+    \item Problemas de planejamento de projeto restringem os recursos.
+    \item Modelos já foram feitos em PDDL \cite{kovarsky06} e usando planejadores \cite{naves12}.
+    \item Abordagem genética foi implementada para StarCraft 2, mas uma única raça \cite{kuchem13}.
+    \item Modelo mais utilizado ainda é dependente de planejadores e não possui formulação matemática \cite{chan07a}.
+  \end{itemize}
+\end{frame}
+
+\subsection{Visão Geral}
+\begin{frame}{Motivação}
+  \begin{itemize}
+    \item Poucos modelos multiobjetivos para ambientes similares \cite{captain14}, mas nenhum utiliza recursos como funções-objetivo.
+    \item O modelo mais utilizado não possui formulação matemática.
+    \item Os modelos utilizados não englobam as características da raça Zerg.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Objetivo}
+  Unificar problemas de planejamento de projeto com o modelo de produção de recursos em um problema multiobjetivo que possibilite uma modelagem clara da raça Zerg e utilize recursos como função-objetivo.
+\end{frame}
+
+\begin{frame}{Metodologia}
+  \begin{itemize}
+    \item Implementação de quatro otimizadores: dois algoritmos genéticos, MOACO e MOGRASP.
+    \item Dois indicadores foram utilizados para determinar seu desempenho: tempo e hipervolume.
+    \item Os parâmetros de cada otimizador foram determinados pelo \emph{irace}.
+    \item Os casos de teste foram baseados na raça Zerg.
+  \end{itemize}
+\end{frame}
+
+\section{Problemas de Planejamento}
+\begin{frame}{Problemas de Planejamento}
+  Os problemas de planejamento tratados possuem as seguintes características comuns
+  \begin{itemize}
+    \item O objetivo é minimizar tempo em que a última tarefa termina (\emph{makespan})
+    \item Soluções são sequências de tarefas (ou ações).
+    \item Existe uma quantidade inicial de recursos que é manipulada por estas tarefas.
+  \end{itemize}
+\end{frame}
+
+\subsection{Planejamento de Produção online para Produção de Recursos em RTS}
+\begin{frame}{Problema de Planejamento de Produção \emph{online} para Produção de Recursos em RTS}
+\begin{itemize}
+    \item Trata com um conjunto de recursos $R$ e conjunto de restrições $O$.
+    \item O jogo muda de estado ao longo do tempo. Cada estado possui quantidade de recursos e lista de ações não-concluídas.
+    \item Cada ação manipula recursos através de quatro categorias:
+    \begin{itemize}
+      \item \emph{Require}
+      \item \emph{Burrow}
+      \item \emph{Consume}
+      \item \emph{Produce}
+    \end{itemize}
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Aplicações em StarCraft}
+\begin{itemize}
+  \item Otimizador baseado no algoritmo SLA* \cite{branq10}.
+  \item Algoritmo \emph{branch and bound} \cite{churchill11}.
+  \item Novo modelo multiobjetivo \cite{captain14}.
+\end{itemize}
+\end{frame}
+
+\subsection{Planejamento de Projeto com Restrição de Recursos}
+\begin{frame}{Problema de Planejamento de Projeto com Restrição de Recursos}
+  \begin{itemize}
+    \item Trata com recursos renováveis e não-renováveis.
+    \item Possui limite rígido de recursos por todo o horizonte de projeto.
+    \item O conjunto de ações do projeto deve ser feito em sua completude.
+  \end{itemize}
+\end{frame}
+
+\subsection{Planejamento de Produção de Recursos}
+\begin{frame}{Problema de Planejamento de Produção de Recursos}
+\begin{itemize}
+  \item Definido por três variáveis: sistema $S$, estado inicial $I_0$ e estratégia $O$.
+  \item Sistema possui o conjunto de recursos $R$ e o conjunto de tarefas $T$.
+  \item Estado inicial possui os recursos iniciais e as tarefas não-concluídas.
+  \item Estratégia possui as funções-objetivo e as restrições específicas do caso.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Recursos}
+\begin{itemize}
+  \item Cada recurso possui três atributos:
+    \begin{itemize}
+      \item Máximo coletável, $MC_r$
+      \item Máximo utilizável por recurso, $MU_{rs}$
+      \item Equivalência, $E_{sr}$
+    \end{itemize}
+  \item Além de valores referentes a cada atributo, outros valores devem ser guardados para guiar sua manipulação:
+    \begin{itemize}
+      \item Total coletado do recurso, $C_{rt}$
+      \item Total consumido do recurso, $c_{rt}$
+      \item Quantidade utilizável do recurso, $U_{rt}$
+    \end{itemize}
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Restrições de Recursos}
+\begin{align}
+  &\bar{C}_{rt} = min\{C_{rt}, MC_r\}\\
+  &U_{rt} = \bar{C}_{rt} - u_{rt}
+\end{align}
+
+\begin{equation}
+    U_{rt} \leq \sum_{s\in R}^{s \neq r} MU_{rs} U_{st}
+\end{equation}
+\end{frame}
+
+\begin{frame}{Tarefas}
+Tarefas possuem os seguintes atributos:
+\begin{itemize}
+  \item Duração, $d_i$
+  \item Pré-requisitos, $Pr_{ir}$
+  \item Custo, $Ct_{ir}$
+  \item Consumo, $Cm_{ir}$
+  \item Uso, $Bo_{ir}$
+  \item Produção, $P_{ir}$
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Restrições de Tarefas}
+\begin{align}
+  &max\{ U_{rt}, E_{sr}U_{st} | s \in R \} \geq Pr_{ir}\\
+  &U_{rt} - B_{rt} \geq Ct_{ir} + Cm_{ir} + Bo_{ir}
+\end{align}
+\end{frame}
+
+\begin{frame}{Modelo Simplificado}
+\begin{align}
+  &\text{minimizar } min\left\{C_{max}, UB\right\}\\
+  &\text{maximizar } y_m, \forall m \in M\\
+  &\text{minimizar } y_n, \forall n \in N, N \cap M = \emptyset
+\end{align}
+sujeito a
+\begin{flalign}
+  &S_{max} \leq UB\\
+  &y_u > k_u, \forall u \in U\\
+  &y_v < l_v, \forall v \in V\\
+  &|M| + |N| + |U| + |V| \geq 1\\
+  &UB > 0
+\end{flalign}
+\end{frame}
+
+\begin{frame}{Restrições Gerais}
+\footnotesize{
+\begin{flalign}
+  &C_{rt} = C_{r0} + \sum^{i \in x}_i \sum^{t}_{\tau=1} x_{i(\tau-d_i)} P_{ir}, \forall t \in \{1, \dots, UB\}, \forall r \in R\\
+  &u_{rt} = u_{r0} + \sum^{i \in x}_i \sum^{t}_{\tau=1}
+    \left(
+      x_{i(\tau-d_i)} Cm_{ir} +
+      x_{i\tau} Ct_{ir}
+    \right), \forall t \in \{1, \dots, UB\}, \forall r \in R\\
+  &B_{rt} = \sum^{i \in x}_i \sum^{t}_{\tau=1}
+  \left(
+    x_{i\tau} - x_{i(\tau-d_i)}
+  \right)
+  \left(
+    Bo_{ir} + Cm_{ir}
+  \right),
+  \forall t \in \{1, \dots, UB\}, \forall r \in R\\
+  &U_{rt} \leq \sum_{s\in R}^{s \neq r} MU_{rs} U_{st}, \forall t \in \{1, \dots, UB\}, \forall r \in R\\
+  &max\{ U_{rt}, E_{sr}U_{st} | s \in R \} \geq \sum^{i \in x}_i x_{it}Pr_{ir}, \forall t \in \{1, \dots, UB\}, \forall r \in R\\
+  &U_{rt} - B_{rt} \geq \sum^{i \in x}_i x_{it} (Ct_{ir} + Cm_{ir} + Bo_{ir}), \forall t \in \{1, \dots, UB\}, \forall r \in R
+\end{flalign}}
+\end{frame}
+
+\begin{frame}{Exemplo}
+\begin{figure}[H]
+  \centering
+  \includegraphics[scale=0.33]{Imagens/img2-1.png}
+  \caption{Exemplo de soluções. \emph{6 pool}: 131 segundos, 462 minérios}
+  \label{fig:exem1}
+\end{figure}
+\end{frame}
+
+\subsection{Planejamento de Produção de Recursos com Eventos Cíclicos}
+\begin{frame}{Problema de Planejamento de Produção de Recursos com Eventos Cíclicos}
+\begin{itemize}
+  \item O problema de planejamento de produção de recursos ainda não reproduz as condições da raça Zerg.
+  \item Tarefas que se repetem crescem o tamanho da solução de muito mais rápido que tarefas relevantes.
+  \item Para resolver os dois problemas: eventos cíclicos.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Eventos Cíclicos}
+Eventos possuem os seguintes atributos:
+\begin{itemize}
+  \item Tempo de espera (\emph{cooldown}), $d^e_i$
+  \item Produção, $P^e_{ir}$
+  \item Gatilho, $g^e_i$
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Alterações nas Restrições}
+\begin{align}
+  &C_{rt} = C_{r0} +
+  \sum^{i \in x}_i \sum^{t}_{\tau=1} x_{i(\tau-d_i)} P_{ir} + P^e_{rt},\forall t \in \{1, \dots, UB\}, \forall r \in R\\
+  &\sum^t_{\tau=1} e_{i\tau} = min\{C_{g^e_i t}, MC_{g^e_i}\}, \forall t \in \{1, \dots, UB\}, \forall i \in x^e\\
+  &\sum^t_{\tau=1} \bar{e}_{i\tau} = u_{g^e_i t} + B_{g^e_it}, \forall t \in \{1, \dots, UB\}, \forall i \in x^e
+\end{align}
+\end{frame}
+
+\begin{frame}{Exemplo}
+\begin{figure}[H]
+  \centering
+  \includegraphics[scale=0.33]{Imagens/img2-2.png}
+  \caption{Exemplo de soluções. \emph{6 pool}: 131 segundos, 462 minérios}
+  \label{fig:exem1}
+\end{figure}
+\end{frame}
+
+\section[Algoritmo de Criação]{Algoritmo de Criação de Soluções}
+\begin{frame}{Como criar uma solução para um problema tão geral?}
+\begin{itemize}
+  \item Soluções são sequências de tarefas a serem realizadas.
+  \item Recursos e tarefas possuem relações que podem ser reduzidas.
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Sistema Inicial}
+\begin{figure}
+  \centering
+  \scalebox{0.7} {
+    \begin{tikzpicture}[->, shorten >=1pt,auto,ultra thick]
+      \tikzstyle{vertex}=[rectangle,fill=black!20,minimum size=1cm,node distance=3cm,align=center]
+      \tikzstyle{event}=[circle,fill=black!20,minimum size=1cm,node distance=3cm,align=center]
+      \tikzstyle{task}=[rectangle,fill=black!40,minimum size=1cm,node distance=3cm,align=center]
+      \node[vertex] (r0) {Ouro};
+      \node[vertex] (r1) [right of=r0] {Trabalhador};
+      \node[vertex] (r2) [right of=r1] {Quartel};
+      \node[vertex] (r3) [right of=r2] {Soldado};
+      \node[event] (e0) [above of=r1] {Minerar};
+      
+      \node[task] (t0) [below of=r1] {Fazer Trab.};
+      \node[task] (t1) [right of=t0] {Fazer Quartel};
+      \node[task] (t2) [right of=t1] {Fazer Sold.};
+      \path
+        (e0) edge [bend left=0,color=red,dashed] node { } (r0)
+        (r1) edge [bend right=0,color=black!20!green] node { } (e0)
+        (t0) edge [bend left=0] node { } (r0)
+        (t0) edge [bend left=0, color=red] node { } (r1)
+        (t1) edge [bend left=0] node { } (r0)
+        (t1) edge [bend left=0, color=red] node { } (r2)
+        (t1) edge [bend left=0, color=blue] node { } (r1)
+        (t2) edge [bend left=0] node { } (r0)
+        (t2) edge [bend left=0, color=red] node { } (r3)
+        (t2) edge [bend left=0, color=blue] node { } (r2);
+    \end{tikzpicture}
+  }
+  \caption{Representação de um sistema de um jogo simples de coleta de recursos
+  e produção de unidades.}
+\end{figure}
+\end{frame}
+
+\subsection{Grafo Auxiliar}
+\begin{frame}{Criando Grafo (I)}
+\begin{figure}
+  \centering
+  \scalebox{0.7} {
+    \begin{tikzpicture}[->, shorten >=1pt,auto,ultra thick]
+      \tikzstyle{vertex}=[rectangle,fill=black!20,minimum size=1cm,node distance=3cm,align=center]
+      \tikzstyle{event}=[circle,fill=black!20,minimum size=1cm,node distance=3cm,align=center]
+      \tikzstyle{task}=[rectangle,fill=black!40,minimum size=1cm,node distance=3cm,align=center]
+      \node[vertex] (r0) {$r_0$};
+      \node[vertex] (r1) [right of=r0] {$r_1$};
+      \node[vertex] (r2) [right of=r1] {$r_2$};
+      \node[vertex] (r3) [right of=r2] {$r_3$};
+      \node[event] (e0) [above of=r1] {$e_0$};
+      
+      \node[task] (t0) [below of=r1] {$\theta_0$};
+      \node[task] (t1) [right of=t0] {$\theta_1$};
+      \node[task] (t2) [right of=t1] {$\theta_2$};
+      \path
+        (e0) edge [bend left=0,color=red,dashed] node { } (r0)
+        (r1) edge [bend right=0,color=black!20!green] node { } (e0)
+        (t0) edge [bend left=0] node { } (r0)
+        (t0) edge [bend left=0, color=red] node { } (r1)
+        (t1) edge [bend left=0] node { } (r0)
+        (t1) edge [bend left=0, color=red] node { } (r2)
+        (t1) edge [bend left=0, color=blue] node { } (r1)
+        (t2) edge [bend left=0] node { } (r0)
+        (t2) edge [bend left=0, color=red] node { } (r3)
+        (t2) edge [bend left=0, color=blue] node { } (r2);
+    \end{tikzpicture}
+  }
+\end{figure}
+\end{frame}
+
+\begin{frame}{Criando Grafo (II)}
+\begin{figure}
+  \centering
+  \scalebox{0.7} {
+    \begin{tikzpicture}[->, shorten >=1pt,auto,ultra thick]
+      \tikzstyle{vertex}=[rectangle,fill=black!20,minimum size=1cm,node distance=3cm,align=center]
+      \tikzstyle{event}=[circle,fill=black!20,minimum size=1cm,node distance=3cm,align=center]
+      \tikzstyle{task}=[rectangle,fill=black!40,minimum size=1cm,node distance=3cm,align=center]
+      \node[vertex] (r0) {$r_0$};
+      \node[vertex] (r1) [right of=r0] {$r_1$};
+      \node[vertex] (r2) [right of=r1] {$r_2$};
+      \node[vertex] (r3) [right of=r2] {$r_3$};
+      
+      \node[task] (t0) [below of=r1] {$\theta_0$};
+      \node[task] (t1) [right of=t0] {$\theta_1$};
+      \node[task] (t2) [right of=t1] {$\theta_2$};
+      \path
+        (r1) edge [bend left=0,color=red,dashed] node { } (r0)
+        (t0) edge [bend left=0] node { } (r0)
+        (t0) edge [bend left=0, color=red] node { } (r1)
+        (t1) edge [bend left=0] node { } (r0)
+        (t1) edge [bend left=0, color=red] node { } (r2)
+        (t1) edge [bend left=0, color=blue] node { } (r1)
+        (t2) edge [bend left=0] node { } (r0)
+        (t2) edge [bend left=0, color=red] node { } (r3)
+        (t2) edge [bend left=0, color=blue] node { } (r2);
+    \end{tikzpicture}
+  }
+\end{figure}
+\end{frame}
+
+\begin{frame}{Criando Grafo (III)}
+\begin{figure}
+  \centering
+  \scalebox{0.7} {
+    \begin{tikzpicture}[->, shorten >=1pt,auto,ultra thick]
+      \tikzstyle{vertex}=[rectangle,fill=black!20,minimum size=1cm,node distance=3cm,align=center]
+      \tikzstyle{event}=[circle,fill=black!20,minimum size=1cm,node distance=3cm,align=center]
+      \tikzstyle{task}=[rectangle,fill=black!40,minimum size=1cm,node distance=3cm,align=center]
+      \node[vertex] (r1) [right of=r0] {$r_0r_1$};
+      \node[vertex] (r2) [right of=r1] {$r_2$};
+      \node[vertex] (r3) [right of=r2] {$r_3$};
+      
+      \node[task] (t0) [below of=r1] {$\theta_0$};
+      \node[task] (t1) [right of=t0] {$\theta_1$};
+      \node[task] (t2) [right of=t1] {$\theta_2$};
+      \path
+        (t0) edge [bend left=20] node { } (r1)
+        (t0) edge [bend left=0, color=red] node { } (r1)
+        (t1) edge [bend left=20] node { } (r1)
+        (t1) edge [bend left=0, color=red] node { } (r2)
+        (t1) edge [bend left=0, color=blue] node { } (r1)
+        (t2) edge [bend left=0] node { } (r1)
+        (t2) edge [bend left=0, color=red] node { } (r3)
+        (t2) edge [bend left=0, color=blue] node { } (r2);
+    \end{tikzpicture}
+  }
+\end{figure}
+\end{frame}
+
+\begin{frame}{Versão Final do Grafo}
+\begin{figure}
+  \centering
+\scalebox{0.7} {
+    \begin{tikzpicture}[->, shorten >=1pt,auto,ultra thick]
+    \tikzstyle{vertex}=[rectangle,fill=black!20,minimum size=1cm,node distance=3cm,align=center]
+      \tikzstyle{task}=[rectangle,fill=black!40,minimum size=1cm,node distance=3cm,align=center]
+      \node[task] (T0) {$\theta_0$};
+      \node[task] (T1) [right of=T0] {$\theta_1$};
+      \node[task] (T2) [right of=T1] {$\theta_2$};
+      \path
+        (T1) edge [bend left=60] node {$w_{cost}$} (T0)
+        (T1) edge [bend left=0, color=blue] node {$w_{borrow}$} (T0)
+        (T2) edge [bend right=50] node {$w_{cost}$} (T0)
+        (T2) edge [bend left=0, color=blue] node {$w_{borrow}$} (T1);
+    \end{tikzpicture}
+  }  
+  \caption{Sistema simplificado.}
+\end{figure}
+\end{frame}
+
+\begin{frame}{Como selecionar tarefas?}
+  \begin{itemize}
+    \item Não sabemos o comportamento necessário para um determinado caso.
+  \end{itemize}
+\end{frame}
+
+\subsection{Valoração das Tarefas}
+\begin{frame}{Pesos}
+\begin{itemize}
+  \item $\delta_o$: objetivos
+  \item $\delta_r$: restrições
+  \item $\delta_p$: pré-requisitos e usos
+  \item $\delta_c$: custos e consumos
+  \item $\delta_m$: aumento de máximo utilizável de um recurso
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Valores Iniciais}
+Cada tarefa recebe:
+\begin{itemize}
+  \item $\delta_o$ para cada tipo de recurso cujo objetivo seja ajudado
+  \item $-\frac{\delta_o}{2}$ para cada recurso cujo objetivo seja atrapalhado
+  \item $\delta_r$ para cada recurso que ajude a cumprir restrições
+  \item $-\frac{\delta_r}{2}$ para cada recurso cujas restrições sejam atrapalhadas
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Algoritmo de Valoração}
+\begin{center}
+  \scalebox{.65}{
+    \begin{minipage}{1\linewidth}
+      \begin{algorithm}[H]
+      \begin{algorithmic}[1]
+      \Procedure{getValues}
+      {$I_0$, $O$, $\delta_o$, $\delta_r$, $\delta_p$, $\delta_c$, $\delta_m$}
+
+      \State $initial \gets$ \Call{initialWeights}
+        {$\delta_o$, $\delta_r$, $I_0$, $O$}
+      \State $taskValues \gets initial$
+      \State $graph \gets$ \Call{initialGraph}{$S$}
+      \State \Call{pruneGraph}{$prerequisites$}
+      \State \Call{pruneGraph}{$borrow$}
+      \State \Call{getWeights}{$I_0$, $\delta_p$, $\delta_c$, $\delta_m$}
+      \For{$i = 1$ \textbf{to} $T$}
+        \If{$initial[i] > 0$}
+          \State \Call{passValues}
+            {$i$, $\delta_p$, $\delta_c$, $\delta_m$, $taskValues$}
+        \EndIf
+      \EndFor
+      \For{$i = 1$ \textbf{to} $T$}
+        \If{\Call{not\_possible}{$I_0$, $i$}}
+          \State $initial[i] \gets -\infty$
+        \EndIf
+      \EndFor
+      \State $difference \gets$ \Call{greatestNegative}{$taskValues$}
+      \State \Call{add}{$taskValues$, $difference$}
+      \State \Call{normalize}{$taskValues$, $x > 0$}
+      \State \Return $taskValues$
+      \EndProcedure
+      \end{algorithmic}
+      %\caption{Algoritmo de valoração de tarefas em um estado $I_0$ segundo uma estratégia $O$.}
+      \end{algorithm}
+    \end{minipage}
+  }
+\end{center}
+\end{frame}
+
+\begin{frame}{Pesos das Arestas}
+\begin{equation}
+w_{e} = \delta
+  \left[
+    \sigma +
+    \left(
+      tanh\left(\frac{B_e}{C_e}\right)
+      \frac{B_e}{B_e + A_e}
+    \right)^2
+  \right]
+\end{equation}
+
+Onde
+\begin{itemize}
+  \item $\delta$ é o peso correspondente ao tipo de aresta,
+  \item $\sigma$ recebe $0,3$ se houver evento que produza recurso que liga as tarefas,
+  \item $B_e$ é o bônus associado à tarefa-alvo,
+  \item $A_e$ é a base de comparação para $B_e$,
+  \item $C_e$ é a necessidade da tarefa origem.
+\end{itemize}
+\end{frame}
+
+\subsection{Algoritmo de Criação}
+\begin{frame}{Algoritmo de Criação}
+\begin{center}
+  \scalebox{.65}{
+    \begin{minipage}{1\linewidth}
+\begin{algorithm}[H]
+\begin{algorithmic}[1]
+\Procedure{create}
+{$I_0$, $O$, $\delta_o$, $\delta_r$, $\delta_p$, $\delta_c$, $\delta_m$, $\Delta_o$, $\Delta_r$}
+\State $x \gets \{\}$
+\State $r \gets 1$
+\While{\Call{not\_valid}{$x$, $O$}}
+  \State $values \gets$ \Call{getValues}
+    {$I_0$, $O$, $\delta_o$, $\delta_r$, $\delta_p$, $\delta_c$, $\delta_m$}
+  \State $\delta_o \gets \delta_o \Delta_o$
+  \State $\delta_r \gets \delta_r \Delta_r$
+  \State $x \gets x$ $\cup$ \Call{roulette}{values}
+  \If{$S_{max}(x) > UB$}
+    \State $size \gets$ \Call{$x.$size}{}
+    \State \Call{$x$.resize}{$size - r$}
+    \State $r \gets r + 1$
+    \If{$r >$ \Call{$x.$size}{}}
+      \State $r \gets 1$
+    \EndIf
+  \EndIf
+\EndWhile
+\State \Return $x$
+\EndProcedure
+\end{algorithmic}
+\end{algorithm}
+    \end{minipage}
+  }
+\end{center}
+\end{frame}
+
+\section{Otimizadores}
+\begin{frame}{Otimizadores}
+Foram implementados quatro otimizadores:
+\begin{itemize}
+    \item NSGA-II -- Non-Dominated Sorting Genetic Algorithm
+    \item ``Joelho'' -- Variação do NSGA-II
+  \item MOACO -- Multi-Objective Ant Colony Optimization
+  \item MOGRASP -- Multi-Objective Greedy Random Adaptive Search Procedure
+\end{itemize}
+\end{frame}
+
+\subsection{Algoritmos Genéticos}
+\begin{frame}{Características dos Algoritmos Genéticos}
+\begin{itemize}
+  \item Não possui \emph{crossover}
+  \item Mutação é obrigatória, ao invés de probabilística
+  \item Implementação paralela
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Algoritmo Genético Multiobjetivo}
+\begin{center}
+  \scalebox{.65}{
+    \begin{minipage}{1\linewidth}
+\begin{algorithm}[H]
+\begin{algorithmic}
+\Procedure{MOGA}{$I_0$, $O$, $n$, $\delta_o^F$, $\delta_r^F$, $\Delta_o^F$, $\Delta_r^F$}
+\State $x \gets$ \Call{generateParallel}{$n$}
+\State \Call{evaluateAndSort}{$x$}
+\For{$i = 1$ \textbf{to} $it$}
+  \State $x \gets$ \Call{select}{$x$}
+  \State $\dot{x} \gets \emptyset$
+  \ForAll{$s \in x$ \emph{in parallel}}
+    \State $\dot{x} \gets \dot{x}$ $\cup$ \Call{mutate}{$s$, $\delta_o^F$, $\delta_r^F$, $\Delta_o^F$, $\Delta_r^F$}
+  \EndFor
+  \State $x \gets x$ $\cup$ $\dot{x}$
+  \State \Call{evaluateAndSort}{$x$}
+\EndFor
+\EndProcedure
+\end{algorithmic}
+\label{alg:nsga}
+\end{algorithm}
+    \end{minipage}
+  }
+\end{center}
+\end{frame}
+
+\begin{frame}{Variações}
+Duas variações foram implementadas, diferindo no algoritmo de seleção de soluções.
+  \begin{itemize}
+    \item NSGA-II: utiliza o ordenamento de não-dominância.
+    \item ``Joelho'': utiliza o ângulo entre soluções como parâmetro de ordenação.
+  \end{itemize}
+\end{frame}
+
+
+\subsection{MOACO}
+\begin{frame}{Criação de Soluções}
+\begin{figure}
+  \centering
+  \scalebox{0.7} {
+    \begin{tikzpicture}[->, shorten >=1pt,auto,ultra thick]
+      \tikzstyle{task}=[rectangle,fill=black!40,minimum size=1cm,node distance=3cm,align=center]
+      \node[initial,task] (S) {$S$};
+      \node[task] (T0) [above right of=S] {$T_0$};
+      \node[task] (T1) [right of=S]       {$T_1$};
+      \node[task] (T2) [below right of=S] {$T_2$};
+      \path
+        (S) edge node { } (T0)
+        (S) edge node { } (T1)
+        (S) edge node { } (T2)
+
+        (T1) edge node { } (T0)
+        (T2) edge node { } (T0)
+        (T2) edge node { } (T1)
+        
+        (T0) edge node { } (T1)
+        (T0) edge node { } (T2)
+        (T1) edge node { } (T2);
+    \end{tikzpicture}
+  }
+  \caption{Grafo para um algoritmo de criação de soluções baseado em formigas.}
+  \label{fig:ants}
+\end{figure}
+\end{frame}
+
+\begin{frame}{Algoritmo}
+\begin{center}
+  \scalebox{.65}{
+    \begin{minipage}{1\linewidth}
+\begin{algorithm}[H]
+\begin{algorithmic}
+\Procedure{MOACO}{$I_0$, $O$, $\delta_o$, $\delta_r$, $\Delta_o$, $\Delta_r$, $\rho$, $\alpha$, $\beta$, $n$, $\delta_o^F$, $\delta_r^F$, $\Delta_o^F$, $\Delta_r^F$}
+\State $x* \gets \emptyset$
+\State \Call{initialize}{$\tau$}
+\For{$i = 1$ \textbf{até} $it$}
+  \State $\dot{x} \gets \emptyset$
+  \For{$ant \in ants$ \emph{in parallel}}
+    \State $x \gets $ \Call{createAnt}{$x$, $I_0$, $O$, $\delta_o$, $\delta_r$, $\Delta_o$, $\Delta_r$, $\tau$, $\alpha$, $\beta$}
+    \State $x \gets $ \Call{localSearch}{$x$, $n$, $\delta_o^F$, $\delta_r^F$, $\Delta_o^F$, $\Delta_r^F$}
+    \State $\dot{x} \gets \dot{x}$ $\cup$ $x$
+  \EndFor
+  \State $x* \gets x*$ $\cup$ $\dot{x}$
+  \State $x* \gets \{x' \in x* | \not{\exists} x_i \in x*, x_i \succ x'\}$
+  \State \Call{update}{$\tau$, $\rho$}
+\EndFor
+
+\Return $x*$
+\EndProcedure
+\end{algorithmic}
+\label{alg:moaco}
+\end{algorithm}
+    \end{minipage}
+  }
+\end{center}
+\end{frame}
+
+
+\section{Resultados}
+\begin{frame}{Experimentos}
+\begin{itemize}
+  \item Rodados com Debian 8.4 64-bit, i7 4790K @ 4GHz, 16GB RAM.
+  \item Implementado em C++11 com a biblioteca OpenMP.
+  \item Parâmetros indicados pelo \emph{irace} após 840 experimentos.
+\end{itemize}
+\end{frame}
+
+\subsection{Casos de Teste}
+\begin{frame}{Características}
+\begin{itemize}
+  \item Baseados na raça Zerg de StarCraft
+  \item Reproduzem estratégias mais comuns dos campeonatos
+  \item Possuem diferentes profundidades e larguras
+\end{itemize}
+\end{frame}
+
+\begin{frame}{Casos de Teste (I)}
+\begin{center}
+  \scalebox{.65}{
+    \begin{minipage}{1\linewidth}
+\begin{table}
+\centering
+\caption{Funções objetivo e restrições adicionais para os casos de teste dos experimentos.}
+\begin{tabular}{c  c  c }
+\textbf{Caso de Teste} & \textbf{Funções Obj.} & \textbf{Restrições}\\
+\hline
+(a) & - & $Guardian > 1$\\
+\hline
+(b) & max. usable $Minerals$ & $Guardian \geq 1$\\
+\hline
+(c) & - & \begin{tabular}{c}$Mutalisk \geq 1$\\$Zergling \geq 1$\end{tabular}\\
+\hline
+(d) & max. usable $Minerals$ & \begin{tabular}{c}$Mutalisk \geq 1$\\$Zergling \geq 1$\end{tabular}\\
+\hline
+(e) & \begin{tabular}{c}max. usable $Minerals$\\max. usable $Mutalisk$\end{tabular} & \begin{tabular}{c}$Mutalisk \geq 1$\\$Zergling \geq 1$\end{tabular}\\
+\hline
+(f) & - & $Ultralisk \geq 1$\\
+\hline
+(g) & max. usable $Minerals$ & $Ultralisk \geq 1$\\
+\hline
+(h) & max. usable $Hydralisk$ & \begin{tabular}{c}$Hydralisk \geq 1$\\$Grooved\,Spines \geq 1$\end{tabular}\\
+\hline
+(i) & \begin{tabular}{c}max. usable $Minerals$\\max. usable $Hydralisk$\end{tabular} & \begin{tabular}{c}$Hydralisk \geq 1$\\$Grooved\,Spines \geq 1$\end{tabular}\\
+\hline
+(j) & max. usable $Minerals$ & \begin{tabular}{c}$Hydralisk \geq 1$\\$Hatchery \geq 3$\end{tabular}\\
+\end{tabular}
+\end{table}
+    \end{minipage}
+  }
+\end{center}
+\end{frame}
+
+
+\begin{frame}{Casos de Teste (I)}
+\begin{center}
+  \scalebox{.65}{
+    \begin{minipage}{1\linewidth}
+\begin{table}
+\centering
+\caption{Funções objetivo e restrições adicionais para os casos de teste dos experimentos.}
+\begin{tabular}{c  c  c }
+\textbf{Caso de Teste} & \textbf{Funções Obj.} & \textbf{Restrições}\\
+(k) & - & \begin{tabular}{c}$Zergling \geq 1$\\$Metabolic\,Boost \geq 1$\end{tabular}\\
+\hline
+(l) & max. usable $Minerals$ & \begin{tabular}{c}$Zergling \geq 1$\\$Metabolic\,Boost \geq 1$\end{tabular}\\
+\hline
+(m) & max. usable $Zergling$ & \begin{tabular}{c}$Zergling \geq 1$\\$Metabolic\,Boost \geq 1$\end{tabular}\\
+\hline
+(n) & \begin{tabular}{c}max. usable $Minerals$\\max. usable $Zergling$\end{tabular} & \begin{tabular}{c}$Zergling \geq 1$\\$Metabolic\,Boost \geq 1$\end{tabular}\\
+\hline
+(o) & \begin{tabular}{c}max. usable $Minerals$\\max. usable $Zergling$\end{tabular} & $Zergling \geq 1$\\
+\end{tabular}
+\end{table}
+    \end{minipage}
+  }
+\end{center}
+\end{frame}
+
+\subsection{Indicadores}
+\begin{frame}{Ranking dos Algoritmos}
+\begin{table}
+  \centering
+  \begin{tabular}{l | c | c | c | c}
+    & \textbf{NSGA-II} & \textbf{Knee} & \textbf{MOACO} & \textbf{MOGRASP}\\
+    \hline
+    Hipervolume & 1,5 & 2,07 & 2,71 & 3,42 \\
+    Tempo & 1,14 & 2,71 & 3,57 & 2,57 \\
+  \end{tabular}
+\end{table}
+\end{frame}
+
+\begin{frame}{Hipervolumes}
+\begin{figure}
+  \centering
+  \includegraphics[scale=0.17]{Imagens/hv-all.png}
+\end{figure}
+\end{frame}
+
+\begin{frame}{Tempo (I)}
+\begin{figure}
+  \centering
+  \includegraphics[scale=0.18]{Imagens/time-long.png}
+\end{figure}
+\end{frame}
+\begin{frame}{Tempo (II)}
+\begin{figure}
+  \centering
+  \includegraphics[scale=0.2]{Imagens/time-short.png}
+\end{figure}
+\end{frame}
+
+\subsection{Testes Estatísticos}
+\begin{frame}{p-Valores (I)}
+\begin{table}
+  \centering
+  \tiny{
+  \begin{tabular}{c c c c || c c c c}
+  \hline
+    (a) & Knee & MOACO & MOGRASP & (b) &Knee & MOACO & MOGRASP\\
+    NSGA-II & 0.1136 & 0.09611 & 0.3291 & NSGA-II & \textbf{1.25E-4} & \textbf{3.21E-16} & \textbf{2.20E-16} \\
+    Knee& & \textbf{0.001592} & \textbf{0.01872}    & Knee& & \textbf{2.67E-6} & \textbf{7.41E-13}\\
+    MOACO & & & 0.7282  & MOACO & & & \textbf{4.58E-9}\\
+\hline
+\hline
+    (c) &Knee & MOACO & MOGRASP & (d) &Knee & MOACO & MOGRASP \\
+    NSGA-II & 0.1136 & 0.09611 & 0.3291  & NSGA-II & 0.3504 & \textbf{1.11E-5} & \textbf{1.55E-14} \\
+    Knee& & \textbf{0.04719} & 0.06764 & Knee& & \textbf{5.96E-8} & \textbf{1.13E-15}\\
+    MOACO & & & \textbf{0.001507} & MOACO & & & \textbf{1.99E-10}\\
+\hline
+\hline
+(e) & Knee & MOACO & MOGRASP & (f) & Knee & MOACO & MOGRASP\\
+NSGA-II & & \textbf{8.90E-5} & \textbf{1.40E-5} & NSGA-II & 0.4596 & 0.9175 & 0.7171\\
+Knee & & & & Knee & & 0.311 & 0.7901\\
+MOACO & & & 0.8891 & MOACO & & & 0.6572\\
+ 
+\hline
+\hline
+(g) & Knee & MOACO & MOGRASP & (h) & Knee & MOACO & MOGRASP\\
+NSGA-II & \textbf{1.88E-6} & \textbf{3.12E-13} & \textbf{2.20E-16} & NSGA-II & 0.8016 & \textbf{0.02415} & \textbf{3.98E-9}\\
+Knee & & \textbf{3.78E-5} & \textbf{2.20E-16} & Knee & & 0.05099 & \textbf{7.67E-8}\\
+MOACO & & & \textbf{2.20E-16} & MOACO & & & \textbf{8.06E-10}\\
+
+\hline
+\hline
+(i) & Knee & MOACO & MOGRASP & (j) & Knee & MOACO & MOGRASP\\
+NSGA-II & \textbf{0.04962} & \textbf{2.23E-5} & \textbf{9.16E-8} & NSGA-II & 0.2359 & \textbf{3.09E-10} & \textbf{1.29E-11}\\
+Knee & & \textbf{0.006051} & \textbf{1.77E-5} & Knee & & \textbf{4.11E-6} & \textbf{1.63E-9}\\
+MOACO & & & \textbf{0.04621} & MOACO & & & \textbf{5.43E-5}\\
+ 
+\hline
+  \end{tabular}
+  }
+\end{table}
+\end{frame}
+
+\begin{frame}{p-Valores (II)}
+\begin{table}
+  \centering
+  \tiny{
+  \begin{tabular}{c c c c || c c c c}
+\hline
+(k) & Knee & MOACO & MOGRASP & (l) & Knee & MOACO & MOGRASP\\
+NSGA-II & 0.2615 & \textbf{2.19E-1} & \textbf{8.35E-1} & NSGA-II & \textbf{3.13E-9} & \textbf{3.21E-16} & \textbf{2.20E-16}\\
+Knee & & 0.9742 & 0.2618 & Knee & & \textbf{3.78E-5} & \textbf{0.04458}\\
+MOACO & & & 0.2294 & MOACO & & & \textbf{0.0008691}\\
+ 
+\hline
+\hline
+(m) & Knee & MOACO & MOGRASP & (n) & Knee & MOACO & MOGRASP\\
+NSGA-II & \textbf{0.01551} & \textbf{2.48E-12} & \textbf{1.37E-8} & NSGA-II & \textbf{3.57E-10} & \textbf{2.20E-16} & \textbf{8.78E-2}\\
+Knee & & \textbf{1.71E-7} & \textbf{1.02E-5} & Knee & & \textbf{6.33E-12} & \textbf{1.71E-6}\\
+MOACO & & & 0.2539 & MOACO & & & \textbf{2.20E-16}\\
+ 
+\hline
+  \end{tabular}
+  }
+\end{table}
+
+\end{frame}
+
+\section{Conclusão}
+\begin{frame}{Conclusão}
+\begin{itemize}
+  \item Um novo problema de otimização multiobjetivo foi mostrado.
+  \item Este modelo consegue simular situações reais de um jogo RTS.
+  \item Quatro otimizadores foram implementados para o problema.
+  \item NSGA-II apresentou o melhor desempenho em tempo e hipervolumes.
+  \item Trabalhos futuros incluem:
+  \begin{itemize}
+    \item Criação de tomador de decisão;
+    \item Implementação em \emph{game AI} para StarCraft: Brood War;
+    \item Operadores mais complexos para algoritmos genéticos.
+  \end{itemize}
+\end{itemize}
+\end{frame}
+
+\section{Bibliografia}
+\bibliography{Capitulos/Referencias}
+\bibliographystyle{abnt-alf}
+
+\begin{frame}
+\begin{figure}[b]
+\centering
+\includegraphics[scale=0.2]{scvgg1.jpg}
+\end{figure}
+\begin{center}
+Job's Finished!
+\end{center}
+\end{frame}
+
+
+\end{document}
